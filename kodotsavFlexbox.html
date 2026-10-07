@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kodotsav — Annual Tech Fest Invitation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { moss: '#1F2A22', cream: '#F1EBDD', butter: '#F4D58D', clay: '#D98B6A', sage: '#A9BC96' },
+      fontFamily: {
+        serif: ['Fraunces', 'Georgia', 'serif'],
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif']
+      },
+      keyframes: {
+        slide: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } }
+      },
+      animation: { slide: 'slide 30s linear infinite' }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-moss font-sans text-cream antialiased overflow-x-hidden pt-[env(safe-area-inset-top)] pb-[calc(7rem+env(safe-area-inset-bottom))]">
+
+<!-- top bar -->
+<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
+  <p class="font-serif text-xl">kodotsav<span class="text-butter">.</span></p>
+  <p class="rounded-full border border-cream/30 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-cream/80">Invitation · No. 001</p>
+</div>
+
+<!-- bento hero -->
+<main id="home" class="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 md:grid-cols-6">
+
+  <section class="rounded-[2.5rem] bg-sage p-8 text-moss md:col-span-4 md:row-span-2 md:p-12">
+    <p class="inline-block rounded-full bg-moss px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sage">Annual Tech Fest · [Your College Name]</p>
+    <h1 class="mt-8 font-serif text-[5.5rem] font-semibold leading-[0.85] tracking-tight sm:text-[9rem]">
+      Kodo<span class="font-normal italic text-clay">tsav</span>
+    </h1>
+    <p class="mt-8 max-w-md text-lg leading-relaxed">
+      A festival of code, circuits and curiosity. Students and faculty, consider this your personal invitation to come build, break and celebrate with us.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="#join" class="rounded-full bg-moss px-7 py-3.5 font-bold text-cream transition duration-300 hover:bg-clay hover:text-moss focus:outline-none focus-visible:ring-4 focus-visible:ring-moss/40 active:scale-95">Join the festival</a>
+      <a href="#events" class="rounded-full border-2 border-moss px-7 py-3.5 font-bold transition duration-300 hover:bg-moss hover:text-sage focus:outline-none focus-visible:ring-4 focus-visible:ring-moss/40 active:scale-95">See events</a>
+    </div>
+  </section>
+
+  <section class="flex items-center justify-center rounded-[2.5rem] bg-clay p-6 md:col-span-2">
+    <div class="relative">
+      <svg viewBox="0 0 200 200" class="h-48 w-48 animate-[spin_20s_linear_infinite]" role="img" aria-label="Annual tech fest, open to all, free entry">
+        <defs><path id="ring" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs>
+        <text class="fill-moss text-[13px] font-bold uppercase" textLength="470" lengthAdjust="spacing">
+          <textPath href="#ring">Annual tech fest • open to all • free entry •</textPath>
+        </text>
+      </svg>
+      <span class="absolute inset-0 flex items-center justify-center font-serif text-6xl text-moss">→</span>
+    </div>
+  </section>
+
+  <section class="rounded-[2.5rem] bg-butter p-8 text-moss md:col-span-1">
+    <p class="text-xs font-bold uppercase tracking-widest">Save the date</p>
+    <p class="mt-4 font-serif text-7xl font-semibold leading-none">DD</p>
+    <p class="font-serif text-2xl italic">Month YYYY</p>
+  </section>
+
+  <section class="rounded-[2.5rem] border border-cream/25 p-8 md:col-span-1">
+    <p class="text-xs font-bold uppercase tracking-widest text-butter">Where</p>
+    <p class="mt-4 font-serif text-2xl leading-snug">Main Auditorium &amp; Lab Block</p>
+    <p class="mt-2 text-sm text-cream/70">Gates open 9:00 AM</p>
+  </section>
+</main>
+
+<!-- sliding pills -->
+<div class="mt-10 overflow-hidden border-y border-cream/20 py-4">
+  <div class="flex w-max animate-slide gap-4 whitespace-nowrap font-serif text-3xl italic text-cream/80">
+    <span>hackathon</span><span class="text-clay">✦</span><span>robo wars</span><span class="text-clay">✦</span><span>capture the flag</span><span class="text-clay">✦</span><span>code golf</span><span class="text-clay">✦</span><span>poster pitch</span><span class="text-clay">✦</span><span>gaming arena</span><span class="text-clay">✦</span>
+    <span>hackathon</span><span class="text-clay">✦</span><span>robo wars</span><span class="text-clay">✦</span><span>capture the flag</span><span class="text-clay">✦</span><span>code golf</span><span class="text-clay">✦</span><span>poster pitch</span><span class="text-clay">✦</span><span>gaming arena</span><span class="text-clay">✦</span>
+  </div>
+</div>
+
+<!-- events: horizontal swipe row -->
+<section id="events" class="mx-auto max-w-6xl py-16">
+  <div class="flex items-end justify-between px-4">
+    <h2 class="font-serif text-5xl leading-none sm:text-6xl">Pick your <span class="italic text-butter">arena</span></h2>
+    <p class="hidden text-sm text-cream/60 sm:block">Swipe or scroll →</p>
+  </div>
+
+  <div class="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-6">
+
+    <article tabindex="0" class="group w-72 shrink-0 snap-start rounded-[2.5rem] bg-clay p-7 text-moss transition duration-300 hover:-translate-y-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-butter">
+      <p class="font-serif text-7xl italic leading-none">01</p>
+      <h3 class="mt-16 font-serif text-3xl">Hackathon</h3>
+      <p class="mt-2 text-sm">Build something real in 24 hours with a team of three.</p>
+      <p class="mt-4 max-h-0 overflow-hidden text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100 group-focus:max-h-10 group-focus:opacity-100">Python · Web · ML</p>
+    </article>
+
+    <article tabindex="0" class="group w-72 shrink-0 snap-start rounded-[2.5rem] bg-sage p-7 text-moss transition duration-300 hover:-translate-y-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-butter">
+      <p class="font-serif text-7xl italic leading-none">02</p>
+      <h3 class="mt-16 font-serif text-3xl">Code Golf</h3>
+      <p class="mt-2 text-sm">Solve it in the fewest characters. Brevity is the whole point.</p>
+      <p class="mt-4 max-h-0 overflow-hidden text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100 group-focus:max-h-10 group-focus:opacity-100">Solo · 45 minutes</p>
+    </article>
+
+    <article tabindex="0" class="group w-72 shrink-0 snap-start rounded-[2.5rem] bg-butter p-7 text-moss transition duration-300 hover:-translate-y-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-clay">
+      <p class="font-serif text-7xl italic leading-none">03</p>
+      <h3 class="mt-16 font-serif text-3xl">Capture The Flag</h3>
+      <p class="mt-2 text-sm">Decode clues and break our toy systems, ethically.</p>
+      <p class="mt-4 max-h-0 overflow-hidden text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100 group-focus:max-h-10 group-focus:opacity-100">Security · Teams of two</p>
+    </article>
+
+    <article tabindex="0" class="group w-72 shrink-0 snap-start rounded-[2.5rem] bg-cream p-7 text-moss transition duration-300 hover:-translate-y-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-butter">
+      <p class="font-serif text-7xl italic leading-none">04</p>
+      <h3 class="mt-16 font-serif text-3xl">Robo Wars</h3>
+      <p class="mt-2 text-sm">Bring a bot, leave with bragging rights.</p>
+      <p class="mt-4 max-h-0 overflow-hidden text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100 group-focus:max-h-10 group-focus:opacity-100">Hardware · Teams of four</p>
+    </article>
+
+    <article tabindex="0" class="group w-72 shrink-0 snap-start rounded-[2.5rem] bg-clay p-7 text-moss transition duration-300 hover:-translate-y-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-butter">
+      <p class="font-serif text-7xl italic leading-none">05</p>
+      <h3 class="mt-16 font-serif text-3xl">Poster Pitch</h3>
+      <p class="mt-2 text-sm">Two minutes, one poster, faculty on the panel.</p>
+      <p class="mt-4 max-h-0 overflow-hidden text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100 group-focus:max-h-10 group-focus:opacity-100">Research · Open to all</p>
+    </article>
+  </div>
+</section>
+
+<!-- day in three tiles -->
+<section class="mx-auto grid max-w-6xl gap-4 px-4 md:grid-cols-3">
+  <div class="rounded-[2.5rem] border border-cream/25 p-8 transition duration-300 hover:bg-cream hover:text-moss">
+    <p class="font-serif text-4xl italic">Morning</p>
+    <ul class="mt-6 space-y-3 text-sm">
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Registration &amp; chai</span><span class="font-bold">09:00</span></li>
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Inauguration</span><span class="font-bold">10:00</span></li>
+      <li class="flex justify-between"><span>Hackathon begins</span><span class="font-bold">11:00</span></li>
+    </ul>
+  </div>
+  <div class="rounded-[2.5rem] border border-cream/25 p-8 transition duration-300 hover:bg-cream hover:text-moss">
+    <p class="font-serif text-4xl italic">Afternoon</p>
+    <ul class="mt-6 space-y-3 text-sm">
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Capture The Flag</span><span class="font-bold">13:00</span></li>
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Poster Pitch</span><span class="font-bold">14:30</span></li>
+      <li class="flex justify-between"><span>Robo Wars</span><span class="font-bold">15:30</span></li>
+    </ul>
+  </div>
+  <div class="rounded-[2.5rem] border border-cream/25 p-8 transition duration-300 hover:bg-cream hover:text-moss">
+    <p class="font-serif text-4xl italic">Evening</p>
+    <ul class="mt-6 space-y-3 text-sm">
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Gaming Arena finals</span><span class="font-bold">16:30</span></li>
+      <li class="flex justify-between border-b border-current/20 pb-2"><span>Prize distribution</span><span class="font-bold">18:00</span></li>
+      <li class="flex justify-between"><span>Vote of thanks</span><span class="font-bold">18:45</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="mx-auto mt-16 max-w-3xl px-4">
+  <h2 class="font-serif text-4xl sm:text-5xl">Quick <span class="italic text-butter">questions</span></h2>
+  <div class="mt-6 divide-y divide-cream/20 border-y border-cream/20">
+    <details class="group py-5">
+      <summary class="flex cursor-pointer list-none items-center justify-between text-lg font-medium focus:outline-none focus-visible:text-butter">
+        Who can attend?
+        <span class="text-3xl text-butter transition duration-300 group-open:rotate-45">+</span>
+      </summary>
+      <p class="mt-3 text-cream/70">Every student and faculty member of the college. Guests from other departments are welcome too.</p>
+    </details>
+    <details class="group py-5">
+      <summary class="flex cursor-pointer list-none items-center justify-between text-lg font-medium focus:outline-none focus-visible:text-butter">
+        Is there a fee?
+        <span class="text-3xl text-butter transition duration-300 group-open:rotate-45">+</span>
+      </summary>
+      <p class="mt-3 text-cream/70">No. Entry and all events are free for registered participants.</p>
+    </details>
+    <details class="group py-5">
+      <summary class="flex cursor-pointer list-none items-center justify-between text-lg font-medium focus:outline-none focus-visible:text-butter">
+        Can I join more than one event?
+        <span class="text-3xl text-butter transition duration-300 group-open:rotate-45">+</span>
+      </summary>
+      <p class="mt-3 text-cream/70">Yes, as long as the timings do not overlap. Check the schedule above before registering.</p>
+    </details>
+  </div>
+</section>
+
+<!-- join -->
+<section id="join" class="mx-auto mt-16 max-w-6xl px-4">
+  <div class="rounded-[3rem] bg-butter px-6 py-16 text-center text-moss sm:px-12">
+    <p class="font-serif text-2xl italic">Your seat is waiting.</p>
+    <h2 class="mt-2 font-serif text-6xl font-semibold leading-[0.9] tracking-tight sm:text-8xl">Come as you are,<br>leave with ideas.</h2>
+    <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <a href="#" class="w-full rounded-full bg-moss px-8 py-4 font-bold text-cream transition duration-300 hover:bg-clay hover:text-moss focus:outline-none focus-visible:ring-4 focus-visible:ring-moss/40 active:scale-95 sm:w-auto">Register as student</a>
+      <a href="#" class="w-full rounded-full border-2 border-moss px-8 py-4 font-bold transition duration-300 hover:bg-moss hover:text-butter focus:outline-none focus-visible:ring-4 focus-visible:ring-moss/40 active:scale-95 sm:w-auto">Confirm as faculty</a>
+    </div>
+    <p class="mt-8 text-sm">techfest@yourcollege.edu · +91 00000 00000</p>
+  </div>
+  <p class="mt-6 text-center text-xs text-cream/50">Built with Tailwind CSS (CDN) · Annual Tech Fest · Dept. of CSE</p>
+</section>
+
+<!-- floating pill nav -->
+<nav class="fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 flex justify-center px-4">
+  <div class="flex items-center gap-1 rounded-full bg-cream p-1.5 text-sm font-bold text-moss shadow-2xl shadow-black/40">
+    <a href="#home" class="rounded-full px-5 py-2.5 transition duration-200 hover:bg-moss hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-moss">Home</a>
+    <a href="#events" class="rounded-full px-5 py-2.5 transition duration-200 hover:bg-moss hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-moss">Events</a>
+    <a href="#join" class="rounded-full bg-clay px-5 py-2.5 transition duration-200 hover:bg-moss hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-moss">Join</a>
+  </div>
+</nav>
+
+</body>
+</html>
