@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hisaab - Split shared expenses with friends</title>
+<!-- SET 1: Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;700;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        forest:'#0F4D3A', blush:'#FFC8DC', snow:'#EEF3F0', ink:'#0B1F18', owe:'#D6333A', get:'#1E9E5C',
+        av1:'#FFC8DC', av2:'#BDE3FF', av3:'#C8F0D2', av4:'#FFE29A', av5:'#D9CCFF', av6:'#FFD2B8'
+      },
+      fontFamily: { display:['Gabarito','system-ui','sans-serif'], body:['"Nunito Sans"','system-ui','sans-serif'] }
+    } }
+  }
+</script>
+</head>
+
+<body class="bg-snow text-ink font-body antialiased">
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+  <!-- Top bar -->
+  <header class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="relative w-11 h-11 rounded-full bg-forest overflow-hidden flex" aria-hidden="true">
+        <span class="w-1/2 h-full bg-blush"></span>
+      </span>
+      <span class="font-display font-black text-3xl tracking-tight">Hisaab</span>
+    </div>
+    <div class="flex gap-2 text-sm font-bold">
+      <button id="sampleBtn" type="button" class="px-4 py-2 rounded-full bg-white border-2 border-ink/15 hover:border-forest hover:bg-forest hover:text-white transition-colors focus:outline-none focus:ring-4 focus:ring-forest/30">Load sample trip</button>
+      <button id="clearBtn" type="button" class="px-4 py-2 rounded-full border-2 border-ink/15 hover:border-owe hover:text-owe transition-colors focus:outline-none focus:ring-4 focus:ring-owe/30">Clear all</button>
+    </div>
+  </header>
+
+  <!-- Hero total -->
+  <section class="mt-6 bg-forest text-white rounded-[2rem] px-6 sm:px-10 py-8 sm:py-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+    <div>
+      <p class="text-blush font-bold text-lg">Shared expenses, fairly split.</p>
+      <p id="heroTotal" class="font-display font-black text-6xl sm:text-7xl lg:text-8xl leading-none tracking-tight mt-2">Rs 0</p>
+      <p id="heroSub" class="mt-3 text-white/80 text-lg max-w-md">Add your friends, then add what each person paid.</p>
+    </div>
+    <div id="heroAvatars" class="flex -space-x-3 shrink-0"></div>
+  </section>
+
+  <div class="mt-6 grid lg:grid-cols-5 gap-6 items-start">
+
+    <!-- LEFT: people and expense form -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- People -->
+      <section class="bg-white rounded-[1.75rem] p-6">
+        <h2 class="font-display font-bold text-2xl">Who is in the group?</h2>
+        <div class="mt-4 flex gap-2">
+          <input id="personInput" type="text" maxlength="12" autocomplete="off" placeholder="First name"
+                 class="min-w-0 flex-1 bg-snow border-2 border-transparent rounded-2xl px-4 py-3 focus:outline-none focus:border-forest focus:bg-white transition-colors">
+          <button id="addPerson" type="button" class="shrink-0 bg-forest text-white font-bold px-5 rounded-2xl hover:bg-ink active:scale-95 transition-all focus:outline-none focus:ring-4 focus:ring-forest/30">Add</button>
+        </div>
+        <p id="personError" class="text-owe text-sm font-semibold mt-1.5 min-h-[1.25rem]" role="alert"></p>
+        <ul id="peopleList" class="flex flex-wrap gap-2 mt-1"></ul>
+      </section>
+
+      <!-- SET 3: form with validation -->
+      <section class="bg-white rounded-[1.75rem] p-6">
+        <h2 class="font-display font-bold text-2xl">Add an expense</h2>
+
+        <div id="formAlert" class="hidden mt-3 bg-owe/10 border-2 border-owe text-owe font-bold rounded-2xl px-4 py-2.5 text-sm" role="alert"></div>
+
+        <div class="mt-4">
+          <label for="desc" class="block font-bold text-sm mb-1.5">What was it for?</label>
+          <input id="desc" type="text" maxlength="40" autocomplete="off" placeholder="e.g. Dinner at the dhaba"
+                 class="w-full bg-snow border-2 border-transparent rounded-2xl px-4 py-3 focus:outline-none focus:border-forest focus:bg-white transition-colors">
+          <p id="e-desc" class="text-owe text-sm font-semibold mt-1 min-h-[1.25rem]"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="amount" class="block font-bold text-sm mb-1.5">Amount (Rs)</label>
+            <input id="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"
+                   class="w-full bg-snow border-2 border-transparent rounded-2xl px-4 py-3 focus:outline-none focus:border-forest focus:bg-white transition-colors">
+          </div>
+          <div>
+            <label for="payer" class="block font-bold text-sm mb-1.5">Paid by</label>
+            <select id="payer" class="w-full bg-snow border-2 border-transparent rounded-2xl px-3 py-3 focus:outline-none focus:border-forest focus:bg-white transition-colors"></select>
+          </div>
+        </div>
+        <p id="e-amount" class="text-owe text-sm font-semibold mt-1 min-h-[1.25rem]"></p>
+
+        <div class="flex items-center justify-between mt-1">
+          <span class="font-bold text-sm">Split between</span>
+          <span class="text-sm font-bold">
+            <button id="splitAll" type="button" class="underline underline-offset-4 hover:text-forest">All</button>
+            <span class="text-ink/30 mx-1">|</span>
+            <button id="splitNone" type="button" class="underline underline-offset-4 hover:text-forest">None</button>
+          </span>
+        </div>
+        <div id="splitBox" class="flex flex-wrap gap-2 mt-2 min-h-[2.5rem]"></div>
+        <p id="e-split" class="text-owe text-sm font-semibold mt-1 min-h-[1.25rem]"></p>
+
+        <button id="addExpense" type="button" class="mt-3 w-full bg-forest text-white font-bold text-lg py-3.5 rounded-2xl hover:bg-ink active:scale-[0.98] transition-all focus:outline-none focus:ring-4 focus:ring-forest/30">Add expense</button>
+        <p id="formOk" class="text-get text-sm font-bold mt-2 min-h-[1.25rem]" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <!-- RIGHT: results -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Balances -->
+      <section class="bg-white rounded-[1.75rem] p-6">
+        <h2 class="font-display font-bold text-2xl">Who is owed, who owes</h2>
+        <div id="balances" class="mt-4 space-y-4"></div>
+      </section>
+
+      <!-- Settle up -->
+      <section class="bg-blush rounded-[1.75rem] p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="font-display font-bold text-2xl">Settle up</h2>
+          <button id="copyBtn" type="button" class="text-sm font-bold px-4 py-2 rounded-full bg-white hover:bg-forest hover:text-white transition-colors focus:outline-none focus:ring-4 focus:ring-forest/30">Copy summary</button>
+        </div>
+        <p id="settleHint" class="text-sm mt-1 text-ink/70">The fewest payments that clear every balance.</p>
+        <ul id="settleList" class="mt-4 space-y-3"></ul>
+        <p id="copyMsg" class="text-sm font-bold mt-3 min-h-[1.25rem]" aria-live="polite"></p>
+      </section>
+
+      <!-- History -->
+      <section class="bg-white rounded-[1.75rem] p-6">
+        <h2 class="font-display font-bold text-2xl">All expenses</h2>
+        <ul id="expenseList" class="mt-3 divide-y divide-ink/10"></ul>
+        <p id="expenseEmpty" class="py-6 text-center text-ink/60"></p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- State ----------
+  var people = [];        // names
+  var expenses = [];      // { id, desc, amount (in paise), paidBy, split: [names] }
+  var settled = {};       // payments marked as paid
+  var splitSel = {};      // which people are ticked in the split box
+  var STORE = 'hisaab-v1';
+  var avatarColors = ['bg-av1', 'bg-av2', 'bg-av3', 'bg-av4', 'bg-av5', 'bg-av6'];
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- Helpers ----------
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function money(p) {
+    return 'Rs ' + (p / 100).toLocaleString('en-IN', { minimumFractionDigits: p % 100 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+  }
+
+  function avatar(name, size) {
+    var sum = 0;
+    for (var i = 0; i < name.length; i++) { sum += name.charCodeAt(i); }
+    return '<span class="' + (size || 'w-10 h-10 text-base') + ' ' + avatarColors[sum % avatarColors.length] +
+      ' rounded-full border-2 border-white flex items-center justify-center font-display font-bold shrink-0">' + esc(name.charAt(0).toUpperCase()) + '</span>';
+  }
+
+  function save() { try { localStorage.setItem(STORE, JSON.stringify({ people: people, expenses: expenses, settled: settled })); } catch (e) {} }
+  function load() {
+    try { var raw = localStorage.getItem(STORE); if (raw) { return JSON.parse(raw); } } catch (e) {}
+    return null;
+  }
+
+  // ---------- Calculations ----------
+  // Split an amount (in paise) fairly; leftover paise go to the first people
+  function shares(expense) {
+    var n = expense.split.length, base = Math.floor(expense.amount / n), extra = expense.amount % n, out = {};
+    expense.split.forEach(function (name, i) { out[name] = base + (i < extra ? 1 : 0); });
+    return out;
+  }
+
+  function balances() {
+    var net = {};
+    people.forEach(function (p) { net[p] = 0; });
+    expenses.forEach(function (e) {
+      net[e.paidBy] += e.amount;
+      var s = shares(e);
+      for (var name in s) { net[name] -= s[name]; }
+    });
+    return net;
+  }
+
+  // Greedy settle-up: the biggest debtor pays the biggest creditor
+  function settlements(net) {
+    var give = [], take = [], out = [];
+    for (var name in net) {
+      if (net[name] < 0) { give.push({ name: name, amt: -net[name] }); }
+      if (net[name] > 0) { take.push({ name: name, amt: net[name] }); }
+    }
+    var byAmt = function (a, b) { return b.amt - a.amt; };
+    give.sort(byAmt); take.sort(byAmt);
+    var i = 0, j = 0;
+    while (i < give.length && j < take.length) {
+      var pay = Math.min(give[i].amt, take[j].amt);
+      out.push({ from: give[i].name, to: take[j].name, amt: pay });
+      give[i].amt -= pay; take[j].amt -= pay;
+      if (give[i].amt === 0) { i++; }
+      if (take[j].amt === 0) { j++; }
+    }
+    return out;
+  }
+
+  // ---------- Rendering ----------
+  function renderPeople() {
+    $('peopleList').innerHTML = people.length === 0
+      ? '<li class="text-ink/60 text-sm py-1">No one yet. Add at least two names.</li>'
+      : people.map(function (p) {
+          return '<li class="flex items-center gap-2 bg-snow rounded-full pl-1.5 pr-1 py-1">' + avatar(p, 'w-8 h-8 text-sm') +
+            '<span class="font-bold">' + esc(p) + '</span>' +
+            '<button type="button" data-remove="' + esc(p) + '" aria-label="Remove ' + esc(p) + '" class="w-7 h-7 rounded-full text-lg leading-none hover:bg-owe hover:text-white transition-colors">&times;</button></li>';
+        }).join('');
+
+    // payer dropdown
+    var current = $('payer').value;
+    $('payer').innerHTML = '<option value="">Choose</option>' + people.map(function (p) {
+      return '<option' + (p === current ? ' selected' : '') + '>' + esc(p) + '</option>';
+    }).join('');
+
+    // split chips (peer-checked styles the label when its checkbox is ticked)
+    $('splitBox').innerHTML = people.length === 0 ? '<span class="text-ink/60 text-sm">Add people first.</span>' : people.map(function (p) {
+      var on = splitSel[p] !== false;
+      return '<label class="cursor-pointer"><input type="checkbox" class="peer sr-only" data-split="' + esc(p) + '"' + (on ? ' checked' : '') + '>' +
+        '<span class="flex items-center gap-2 pl-1.5 pr-3.5 py-1 rounded-full border-2 border-ink/15 font-bold peer-checked:bg-forest peer-checked:text-white peer-checked:border-forest peer-focus-visible:ring-4 peer-focus-visible:ring-forest/30 transition-colors">' +
+        avatar(p, 'w-7 h-7 text-xs') + esc(p) + '</span></label>';
+    }).join('');
+  }
+
+  function renderSummary() {
+    var total = expenses.reduce(function (s, e) { return s + e.amount; }, 0);
+    $('heroTotal').textContent = money(total);
+    if (people.length === 0) { $('heroSub').textContent = 'Add your friends, then add what each person paid.'; }
+    else if (expenses.length === 0) { $('heroSub').textContent = people.length + ' in the group. Add the first expense to see who owes what.'; }
+    else {
+      $('heroSub').textContent = expenses.length + (expenses.length === 1 ? ' expense' : ' expenses') + ' shared between ' + people.length +
+        ' people. Average spend per person: ' + money(Math.round(total / people.length)) + '.';
+    }
+    $('heroAvatars').innerHTML = people.slice(0, 6).map(function (p) { return avatar(p, 'w-14 h-14 text-xl'); }).join('');
+  }
+
+  function renderBalances() {
+    var net = balances();
+    var max = 0;
+    people.forEach(function (p) { max = Math.max(max, Math.abs(net[p])); });
+    $('balances').innerHTML = people.length === 0 ? '<p class="text-ink/60">Balances appear here once people are added.</p>' : people.map(function (p) {
+      var v = net[p], w = max === 0 ? 0 : Math.round(Math.abs(v) / max * 50);
+      var label = v > 0 ? '<span class="text-get">gets back ' + money(v) + '</span>' : v < 0 ? '<span class="text-owe">owes ' + money(-v) + '</span>' : '<span class="text-ink/50">all square</span>';
+      var bar = v > 0 ? '<span class="absolute left-1/2 top-0 h-full bg-get rounded-r-full transition-all duration-500" style="width:' + w + '%"></span>'
+              : v < 0 ? '<span class="absolute right-1/2 top-0 h-full bg-owe rounded-l-full transition-all duration-500" style="width:' + w + '%"></span>' : '';
+      return '<div class="flex items-center gap-3">' + avatar(p) +
+        '<div class="flex-1 min-w-0"><div class="flex justify-between gap-2 font-bold"><span class="truncate">' + esc(p) + '</span><span class="shrink-0">' + label + '</span></div>' +
+        '<div class="relative h-3 bg-snow rounded-full mt-1.5"><span class="absolute left-1/2 top-[-3px] w-0.5 h-[18px] bg-ink/30"></span>' + bar + '</div></div></div>';
+    }).join('');
+  }
+
+  function renderSettle() {
+    var list = settlements(balances());
+    if (list.length === 0) {
+      $('settleList').innerHTML = '<li class="text-ink/70 py-2">' + (expenses.length === 0 ? 'Add an expense to see who pays whom.' : 'Everyone is square. Nothing to settle.') + '</li>';
+      return;
+    }
+    $('settleList').innerHTML = list.map(function (s) {
+      var key = s.from + '>' + s.to + ':' + s.amt, done = settled[key] === true;
+      return '<li class="bg-white rounded-2xl p-3 sm:p-4 flex items-center gap-3 flex-wrap transition-opacity' + (done ? ' opacity-50' : '') + '">' +
+        avatar(s.from) +
+        '<svg class="w-6 h-6 shrink-0 text-forest" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>' +
+        avatar(s.to) +
+        '<div class="flex-1 min-w-[8rem]"><p class="font-bold' + (done ? ' line-through' : '') + '">' + esc(s.from) + ' pays ' + esc(s.to) + '</p>' +
+        '<p class="font-display font-black text-2xl' + (done ? ' line-through' : '') + '">' + money(s.amt) + '</p></div>' +
+        '<button type="button" data-paid="' + esc(key) + '" class="text-sm font-bold px-4 py-2 rounded-full border-2 border-forest ' + (done ? 'bg-forest text-white' : 'hover:bg-forest hover:text-white') + ' transition-colors focus:outline-none focus:ring-4 focus:ring-forest/30">' + (done ? 'Paid. Undo' : 'Mark paid') + '</button></li>';
+    }).join('');
+  }
+
+  function renderExpenses() {
+    $('expenseList').innerHTML = expenses.slice().reverse().map(function (e) {
+      var each = Math.round(e.amount / e.split.length);
+      return '<li class="flex items-center gap-3 py-3"><div class="flex-1 min-w-0">' +
+        '<p class="font-bold truncate">' + esc(e.desc) + '</p>' +
+        '<p class="text-sm text-ink/60">' + esc(e.paidBy) + ' paid, split between ' + e.split.length + ' (about ' + money(each) + ' each)</p></div>' +
+        '<span class="font-display font-black text-xl shrink-0">' + money(e.amount) + '</span>' +
+        '<button type="button" data-del="' + e.id + '" aria-label="Delete expense" class="shrink-0 w-9 h-9 rounded-full text-2xl leading-none hover:bg-owe hover:text-white transition-colors">&times;</button></li>';
+    }).join('');
+    $('expenseEmpty').textContent = expenses.length === 0 ? 'No expenses yet. Add one, or load the sample trip to see how it works.' : '';
+  }
+
+  function renderAll() { renderPeople(); renderSummary(); renderBalances(); renderSettle(); renderExpenses(); save(); }
+
+  // ---------- Validation helpers ----------
+  function setErr(inputId, errId, msg) {
+    var el = inputId ? $(inputId) : null;
+    if (el) { el.classList.toggle('border-owe', msg !== ''); el.classList.toggle('bg-owe/5', msg !== ''); }
+    $(errId).textContent = msg;
+    return msg !== '';
+  }
+
+  // ---------- SET 4: add and remove people ----------
+  function addPerson() {
+    var name = $('personInput').value.trim();
+    var msg = '';
+    if (name === '') { msg = 'Type a name first.'; }
+    else if (name.length < 2) { msg = 'A name needs at least 2 letters.'; }
+    else if (!/^[A-Za-z][A-Za-z .'-]*$/.test(name)) { msg = 'Use letters only in a name.'; }
+    else if (people.some(function (p) { return p.toLowerCase() === name.toLowerCase(); })) { msg = name + ' is already in the group.'; }
+    else if (people.length >= 8) { msg = 'A group can have up to 8 people.'; }
+
+    if (setErr('personInput', 'personError', msg)) { return; }
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    people.push(name);
+    splitSel[name] = true;
+    $('personInput').value = '';
+    $('personInput').focus();
+    renderAll();
+  }
+
+  $('addPerson').addEventListener('click', addPerson);
+  $('personInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addPerson(); } });
+
+  $('peopleList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-remove]'); if (!b) { return; }
+    var name = b.dataset.remove;
+    var used = expenses.some(function (x) { return x.paidBy === name || x.split.indexOf(name) !== -1; });
+    if (used) { setErr(null, 'personError', name + ' is part of an expense. Delete those expenses first.'); return; }
+    people = people.filter(function (p) { return p !== name; });
+    delete splitSel[name];
+    setErr(null, 'personError', '');
+    renderAll();
+  });
+
+  // ---------- SET 3: validate and add an expense ----------
+  function addExpense() {
+    var desc = $('desc').value.trim(), raw = $('amount').value.trim().replace(/,/g, ''), payer = $('payer').value;
+    var split = people.filter(function (p) { return splitSel[p] !== false; });
+    var bad = 0;
+    $('formOk').textContent = '';
+
+    var dm = desc === '' ? 'Describe the expense.' : desc.length < 3 ? 'Use at least 3 characters.' : '';
+    if (setErr('desc', 'e-desc', dm)) { bad++; }
+
+    var am = '';
+    var value = parseFloat(raw);
+    if (raw === '') { am = 'Enter the amount.'; }
+    else if (!/^\d+(\.\d{1,2})?$/.test(raw)) { am = 'Use numbers only, with up to 2 decimals.'; }
+    else if (value <= 0) { am = 'The amount must be more than 0.'; }
+    else if (value > 100000) { am = 'The amount cannot be more than Rs 1,00,000.'; }
+    else if (payer === '') { am = 'Choose who paid.'; }
+    if (am === '' && payer === '') { am = 'Choose who paid.'; }
+    if (setErr('amount', 'e-amount', am)) { bad++; }
+    $('payer').classList.toggle('border-owe', payer === '' && raw !== '' && am !== '');
+
+    var sm = split.length === 0 ? 'Pick at least one person to split between.' : '';
+    if (setErr(null, 'e-split', sm)) { bad++; }
+
+    var alert = $('formAlert');
+    if (people.length < 2) {
+      alert.textContent = 'Add at least two people before adding an expense.';
+      alert.classList.remove('hidden');
+      return;
+    }
+    if (bad > 0) {
+      alert.textContent = bad + (bad === 1 ? ' thing needs' : ' things need') + ' fixing before this expense can be added.';
+      alert.classList.remove('hidden');
+      return;
+    }
+    alert.classList.add('hidden');
+
+    var amount = Math.round(value * 100);
+    expenses.push({ id: Date.now(), desc: desc, amount: amount, paidBy: payer, split: split });
+    $('desc').value = ''; $('amount').value = '';
+    $('formOk').textContent = 'Added ' + desc + ' for ' + money(amount) + '.';
+    $('desc').focus();
+    renderAll();
+  }
+
+  $('addExpense').addEventListener('click', addExpense);
+  ['desc', 'amount'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addExpense(); } });
+    $(id).addEventListener('input', function () { setErr(id, id === 'desc' ? 'e-desc' : 'e-amount', ''); });
+  });
+
+  $('splitBox').addEventListener('change', function (e) {
+    var c = e.target.closest('[data-split]'); if (!c) { return; }
+    splitSel[c.dataset.split] = c.checked;
+    if (c.checked) { $('e-split').textContent = ''; }
+  });
+  $('splitAll').addEventListener('click', function () { people.forEach(function (p) { splitSel[p] = true; }); renderPeople(); });
+  $('splitNone').addEventListener('click', function () { people.forEach(function (p) { splitSel[p] = false; }); renderPeople(); });
+
+  // ---------- SET 4: buttons on dynamic content ----------
+  $('expenseList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-del]'); if (!b) { return; }
+    var id = Number(b.dataset.del);
+    expenses = expenses.filter(function (x) { return x.id !== id; });
+    renderAll();
+  });
+
+  $('settleList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-paid]'); if (!b) { return; }
+    var key = b.dataset.paid;
+    settled[key] = !settled[key];
+    renderAll();
+  });
+
+  $('copyBtn').addEventListener('click', function () {
+    var list = settlements(balances());
+    var total = expenses.reduce(function (s, x) { return s + x.amount; }, 0);
+    var lines = ['Hisaab summary', 'Total spent: ' + money(total)];
+    if (list.length === 0) { lines.push('Everyone is square.'); }
+    list.forEach(function (s) { lines.push(s.from + ' pays ' + s.to + ' ' + money(s.amt)); });
+    var text = lines.join('\n');
+    var msg = $('copyMsg');
+    function ok() { msg.textContent = 'Summary copied. Paste it in your group chat.'; msg.className = 'text-sm font-bold mt-3 text-forest'; }
+    function fail() { msg.textContent = 'Copy is blocked here. Select the amounts above and copy them by hand.'; msg.className = 'text-sm font-bold mt-3 text-owe'; }
+    try {
+      var t = document.createElement('textarea');
+      t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      var done = document.execCommand('copy');
+      document.body.removeChild(t);
+      done ? ok() : fail();
+    } catch (err) { fail(); }
+  });
+
+  $('sampleBtn').addEventListener('click', function () {
+    people = ['Aarav', 'Meera', 'Kabir', 'Isha'];
+    splitSel = {}; settled = {};
+    var all = people.slice();
+    expenses = [
+      { id: 1, desc: 'Train tickets', amount: 320000, paidBy: 'Aarav', split: all },
+      { id: 2, desc: 'Hostel stay', amount: 560000, paidBy: 'Meera', split: all },
+      { id: 3, desc: 'Dinner at the dhaba', amount: 148000, paidBy: 'Kabir', split: all },
+      { id: 4, desc: 'Cab to the station', amount: 54000, paidBy: 'Isha', split: ['Isha', 'Aarav', 'Meera'] },
+      { id: 5, desc: 'Snacks and chai', amount: 36000, paidBy: 'Aarav', split: ['Aarav', 'Kabir'] }
+    ];
+    renderAll();
+  });
+
+  // two-step clear, so no pop-up is needed
+  var clearTimer = null;
+  $('clearBtn').addEventListener('click', function () {
+    var b = $('clearBtn');
+    if (b.textContent.trim() === 'Clear all') {
+      b.textContent = 'Tap again to clear';
+      clearTimer = setTimeout(function () { b.textContent = 'Clear all'; }, 3000);
+    } else {
+      clearTimeout(clearTimer);
+      b.textContent = 'Clear all';
+      people = []; expenses = []; settled = {}; splitSel = {};
+      ['e-desc', 'e-amount', 'e-split', 'personError', 'formOk', 'copyMsg'].forEach(function (id) { $(id).textContent = ''; });
+      $('formAlert').classList.add('hidden');
+      renderAll();
+    }
+  });
+
+  // ---------- First load ----------
+  var saved = load();
+  if (saved) { people = saved.people || []; expenses = saved.expenses || []; settled = saved.settled || {}; }
+  renderAll();
+</script>
+</body>
+</html>

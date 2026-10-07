@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Registration - Aarohan College of Technology</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- STEP 2: CSS - green border for valid fields, red border and message for invalid fields -->
+<style>
+  :root {
+    --wine: #5E1A2B;
+    --deep: #3A0F1B;
+    --gold: #E3B04B;
+    --rose: #F5EEEF;
+    --line: #D8CDD0;
+    --ok: #1E8E4E;
+    --bad: #C62828;
+    --text: #2A1A1F;
+    --muted: #7A666C;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0; background: var(--wine); color: var(--text);
+    font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 1.02rem; line-height: 1.5;
+  }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 36px 20px 64px; }
+
+  header { color: #fff; margin-bottom: 28px; }
+  header h1 { margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: clamp(2.4rem, 7vw, 4.4rem); line-height: 1; }
+  header p { margin: 12px 0 0; max-width: 520px; color: #EBCFD5; font-size: 1.1rem; }
+
+  .layout { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: start; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 1.25fr 0.75fr; gap: 56px; } .card-col { position: sticky; top: 24px; } }
+
+  /* ---------- Form sheet ---------- */
+  .sheet { background: #fff; border-radius: 24px; padding: 30px 26px 34px; }
+  .sheet h2 { margin: 0 0 4px; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.8rem; }
+  .sheet .sub { margin: 0 0 22px; color: var(--muted); font-size: .95rem; }
+
+  .alert { background: #FDECEC; border: 2px solid var(--bad); color: #8E1B1B; border-radius: 12px; padding: 10px 14px; margin-bottom: 18px; font-weight: 600; }
+
+  .grid2 { display: grid; gap: 0 18px; grid-template-columns: 1fr; }
+  @media (min-width: 600px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+  .field { margin-bottom: 16px; }
+  .field label.lbl { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 6px; }
+  .req { color: var(--bad); }
+
+  .field input[type="text"], .field input[type="email"], .field input[type="tel"], .field input[type="password"], .field select {
+    width: 100%; font: inherit; color: var(--text); background: var(--rose);
+    border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px;
+    transition: border-color .2s, background-color .2s;
+  }
+  .field input::placeholder { color: #A892A0; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: #fff; box-shadow: 0 0 0 4px rgba(227, 176, 75, .35); }
+
+  .field.valid input, .field.valid select { border-color: var(--ok); background: #F2FBF5; }
+  .field.invalid input, .field.invalid select { border-color: var(--bad); background: #FFF5F5; }
+
+  .error { display: block; min-height: 0; margin-top: 5px; font-size: .86rem; font-weight: 500; color: var(--bad); }
+  .field.valid .error { color: var(--ok); }
+
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 70px; }
+  .pw-toggle {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    font: inherit; font-size: .82rem; font-weight: 700; color: var(--wine);
+    background: none; border: 0; cursor: pointer; padding: 6px 8px; border-radius: 8px;
+  }
+  .pw-toggle:hover { background: #EBDCE0; }
+
+  .meter { display: flex; gap: 5px; margin-top: 8px; }
+  .meter span { flex: 1; height: 6px; border-radius: 3px; background: #E7DCDF; transition: background-color .25s; }
+  .meter.s1 span:nth-child(-n+1) { background: var(--bad); }
+  .meter.s2 span:nth-child(-n+2) { background: #E08A1E; }
+  .meter.s3 span:nth-child(-n+3) { background: #9BB82A; }
+  .meter.s4 span:nth-child(-n+4) { background: var(--ok); }
+  .meter-text { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; }
+  .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--wine); flex: none; }
+  .field.invalid .check { color: var(--bad); }
+
+  .btn {
+    font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer;
+    background: var(--wine); color: #fff; border: 0; border-radius: 999px;
+    padding: 14px 34px; width: 100%; margin-top: 6px;
+    transition: background-color .2s, transform .15s;
+  }
+  .btn:hover { background: var(--deep); }
+  .btn:active { transform: scale(.98); }
+  .btn:focus-visible, .pw-toggle:focus-visible { outline: 4px solid var(--gold); outline-offset: 2px; }
+  .btn.alt { background: transparent; color: var(--wine); border: 2px solid var(--wine); }
+  .btn.alt:hover { background: var(--wine); color: #fff; }
+
+  /* ---------- Success ---------- */
+  .success h2 { color: var(--ok); }
+  .summary { margin: 18px 0 22px; padding: 0; list-style: none; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .summary li { display: flex; justify-content: space-between; gap: 16px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+  .summary li:last-child { border-bottom: 0; }
+  .summary span { color: var(--muted); }
+  .summary b { text-align: right; word-break: break-word; }
+
+  /* ---------- Live ID card ---------- */
+  .card-col { display: flex; justify-content: center; padding-top: 46px; }
+  .lanyard { position: relative; width: 300px; max-width: 100%; }
+  .strap {
+    position: absolute; top: -46px; left: 50%; width: 36px; height: 70px; margin-left: -18px;
+    background: repeating-linear-gradient(135deg, var(--gold) 0 8px, #C8932C 8px 16px);
+    border-radius: 4px 4px 0 0;
+  }
+  .id {
+    position: relative; overflow: hidden;
+    background: var(--deep); color: #fff; border-radius: 22px; padding: 44px 24px 22px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 24px 40px -18px rgba(0, 0, 0, .6);
+  }
+  .id .slot { position: absolute; top: 14px; left: 50%; width: 56px; height: 10px; margin-left: -28px; border-radius: 6px; background: var(--wine); border: 2px solid var(--gold); }
+  .id .school { text-align: center; font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--gold); line-height: 1.2; }
+  .avatar {
+    width: 92px; height: 92px; margin: 16px auto 12px; border-radius: 50%;
+    background: var(--gold); color: var(--deep);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 2.4rem;
+  }
+  .id .nm { text-align: center; font-family: 'DM Serif Display', serif; font-size: 1.6rem; line-height: 1.15; word-break: break-word; min-height: 1.9rem; }
+  .id .nm.empty { color: #A98A93; }
+  .id .course { text-align: center; color: #EBCFD5; font-size: .92rem; margin-top: 2px; min-height: 1.4rem; }
+  .id dl { margin: 14px 0 0; display: grid; gap: 6px; font-size: .88rem; }
+  .id dl div { display: flex; justify-content: space-between; gap: 12px; }
+  .id dt { color: #B8949D; }
+  .id dd { margin: 0; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .checks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; justify-content: center; }
+  .checks span { display: inline-flex; align-items: center; gap: 6px; font-size: .75rem; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: #C9AEB5; }
+  .checks span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #6F4A55; }
+  .checks span.ok { color: #fff; background: rgba(30, 142, 78, .35); }
+  .checks span.ok::before { background: #4ADE80; }
+
+  .barcode { height: 34px; margin-top: 18px; border-radius: 4px; background: repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 5px, #fff 5px 6px, transparent 6px 10px, #fff 10px 13px, transparent 13px 15px); opacity: .9; }
+  .appno { text-align: center; font-size: .78rem; letter-spacing: .12em; color: #B8949D; margin-top: 6px; min-height: 1.1rem; }
+
+  .stamp {
+    position: absolute; top: 46%; left: 50%;
+    border: 5px solid #4ADE80; color: #4ADE80; background: rgba(58, 15, 27, .88);
+    font-weight: 700; font-size: 1.7rem; letter-spacing: .1em; padding: 6px 18px; border-radius: 10px;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    animation: stamp .45s cubic-bezier(.3, 1.6, .5, 1);
+  }
+  @keyframes stamp { from { transform: translate(-50%, -50%) rotate(-12deg) scale(2.2); opacity: 0; } to { transform: translate(-50%, -50%) rotate(-12deg) scale(1); opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) { .stamp { animation: none; } .btn, .field input, .meter span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>Register for the 2026&ndash;27 intake</h1>
+    <p>Fill in your details. Each field is checked as you go, and your student ID card fills in on the right.</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- STEP 1: HTML structure -->
+    <section class="sheet" aria-labelledby="formTitle">
+
+      <form id="regForm" novalidate>
+        <div id="formView">
+          <h2 id="formTitle">Student registration</h2>
+          <p class="sub">Fields marked <span class="req">*</span> are mandatory.</p>
+
+          <div id="alertBox" class="alert" role="alert" hidden></div>
+
+          <div class="field" id="f-name">
+            <label class="lbl" for="fullName">Full name <span class="req">*</span></label>
+            <input type="text" id="fullName" autocomplete="name" placeholder="As on your marksheet">
+            <span class="error" id="e-name" aria-live="polite"></span>
+          </div>
+
+          <div class="grid2">
+            <div class="field" id="f-email">
+              <label class="lbl" for="email">Email address <span class="req">*</span></label>
+              <input type="email" id="email" autocomplete="email" placeholder="name@example.com">
+              <span class="error" id="e-email" aria-live="polite"></span>
+            </div>
+            <div class="field" id="f-mobile">
+              <label class="lbl" for="mobile">Mobile number <span class="req">*</span></label>
+              <input type="tel" id="mobile" inputmode="numeric" autocomplete="tel" placeholder="10 digits, no spaces">
+              <span class="error" id="e-mobile" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="field" id="f-course">
+            <label class="lbl" for="course">Course applied for <span class="req">*</span></label>
+            <select id="course">
+              <option value="">Choose a course</option>
+              <option>B.Tech Computer Engineering</option>
+              <option>B.Tech Electronics and Telecom</option>
+              <option>B.Tech Mechanical Engineering</option>
+              <option>B.Tech Civil Engineering</option>
+              <option>BCA</option>
+            </select>
+            <span class="error" id="e-course" aria-live="polite"></span>
+          </div>
+
+          <div class="grid2">
+            <div class="field" id="f-password">
+              <label class="lbl" for="password">Password <span class="req">*</span></label>
+              <div class="pw-wrap">
+                <input type="password" id="password" autocomplete="new-password" placeholder="At least 8 characters">
+                <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">Show</button>
+              </div>
+              <div class="meter" id="meter"><span></span><span></span><span></span><span></span></div>
+              <div class="meter-text" id="meterText">Use letters and numbers. A symbol makes it stronger.</div>
+              <span class="error" id="e-password" aria-live="polite"></span>
+            </div>
+            <div class="field" id="f-confirm">
+              <label class="lbl" for="confirm">Confirm password <span class="req">*</span></label>
+              <input type="password" id="confirm" autocomplete="new-password" placeholder="Type it again">
+              <span class="error" id="e-confirm" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="field" id="f-terms">
+            <label class="check"><input type="checkbox" id="terms"><span>I declare that the details above are correct and I agree to the admission rules of the college.</span></label>
+            <span class="error" id="e-terms" aria-live="polite"></span>
+          </div>
+
+          <button type="submit" class="btn" id="submitBtn">Submit registration</button>
+        </div>
+
+        <div id="successView" class="success" hidden>
+          <h2>Registration received</h2>
+          <p class="sub">Keep your application number safe. A confirmation will be sent to your email.</p>
+          <ul class="summary" id="summary"></ul>
+          <button type="button" class="btn alt" id="againBtn">Register another student</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Live ID card -->
+    <aside class="card-col" aria-label="Live ID card preview">
+      <div class="lanyard">
+        <div class="strap"></div>
+        <div class="id">
+          <div class="slot"></div>
+          <div class="school">Aarohan College of Technology</div>
+          <div class="avatar" id="avatar">?</div>
+          <div class="nm empty" id="cardName">Your name here</div>
+          <div class="course" id="cardCourse">Course not chosen yet</div>
+          <dl>
+            <div><dt>Email</dt><dd id="cardEmail">&mdash;</dd></div>
+            <div><dt>Mobile</dt><dd id="cardMobile">&mdash;</dd></div>
+          </dl>
+          <div class="checks">
+            <span id="c-name">Name</span><span id="c-email">Email</span><span id="c-mobile">Mobile</span><span id="c-password">Password</span>
+          </div>
+          <div class="barcode"></div>
+          <div class="appno" id="appNo">APPLICATION NUMBER PENDING</div>
+          <div class="stamp" id="stamp" hidden>REGISTERED</div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+  // ---------- STEP 5: validation rules (each returns an error message, or '' if the value is valid) ----------
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;       // local part, @, domain, dot, top-level domain
+  var MOBILE_RE = /^[6-9]\d{9}$/;                    // exactly 10 digits, first digit 6 to 9
+  var NAME_RE = /^[A-Za-z][A-Za-z .'-]*$/;           // letters, spaces, dots, apostrophes, hyphens
+  var MIN_PASSWORD = 8;
+
+  var rules = {
+    name: function (value) {
+      var v = value.trim();
+      if (v === '') { return 'Full name is required.'; }
+      if (v.length < 3) { return 'Enter at least 3 characters.'; }
+      if (!NAME_RE.test(v)) { return 'Use letters, spaces, dots, apostrophes and hyphens only.'; }
+      return '';
+    },
+    email: function (value) {
+      var v = value.trim();
+      if (v === '') { return 'Email address is required.'; }
+      if (!EMAIL_RE.test(v)) { return 'Enter a valid email, like name@example.com.'; }
+      return '';
+    },
+    mobile: function (value) {
+      var v = value.trim();
+      if (v === '') { return 'Mobile number is required.'; }
+      if (/\D/.test(v)) { return 'Digits only. Remove spaces, dashes and +91.'; }
+      if (v.length !== 10) { return 'Mobile number must be exactly 10 digits (you typed ' + v.length + ').'; }
+      if (!MOBILE_RE.test(v)) { return 'A mobile number must start with 6, 7, 8 or 9.'; }
+      return '';
+    },
+    course: function (value) {
+      if (value === '') { return 'Choose the course you are applying for.'; }
+      return '';
+    },
+    password: function (value) {
+      if (value.trim() === '') { return 'Password is required.'; }
+      if (value.length < MIN_PASSWORD) { return 'Use at least ' + MIN_PASSWORD + ' characters (you have ' + value.length + ').'; }
+      if (!/[A-Za-z]/.test(value) || !/\d/.test(value)) { return 'Include at least one letter and one number.'; }
+      return '';
+    },
+    confirm: function (value, passwordValue) {
+      if (value === '') { return 'Type your password again to confirm it.'; }
+      if (value !== passwordValue) { return 'The two passwords do not match.'; }
+      return '';
+    },
+    terms: function (checked) {
+      if (!checked) { return 'You must accept the declaration to continue.'; }
+      return '';
+    }
+  };
+
+  // ---------- DOM references ----------
+  var form = document.getElementById('regForm');
+  var $ = function (id) { return document.getElementById(id); };
+  var inputs = {
+    name: $('fullName'), email: $('email'), mobile: $('mobile'), course: $('course'),
+    password: $('password'), confirm: $('confirm'), terms: $('terms')
+  };
+  var order = ['name', 'email', 'mobile', 'course', 'password', 'confirm', 'terms'];
+  var touched = {};
+
+  function valueOf(key) {
+    return key === 'terms' ? inputs.terms.checked : inputs[key].value;
+  }
+
+  // Run the rule for one field and return its message
+  function check(key) {
+    if (key === 'confirm') { return rules.confirm(inputs.confirm.value, inputs.password.value); }
+    return rules[key](valueOf(key));
+  }
+
+  // STEP 6: show the result next to the field
+  function render(key) {
+    var message = check(key);
+    var box = $('f-' + key);
+    var empty = (key === 'terms') ? !inputs.terms.checked : inputs[key].value === '';
+
+    box.classList.remove('valid', 'invalid');
+    if (message !== '') {
+      box.classList.add('invalid');
+      $('e-' + key).textContent = message;
+    } else {
+      box.classList.add('valid');
+      $('e-' + key).textContent = (key === 'terms' || empty) ? '' : 'Looks good.';
+    }
+    if (key !== 'terms') { inputs[key].setAttribute('aria-invalid', message !== ''); }
+
+    // matching chip on the ID card
+    var chip = $('c-' + key);
+    if (chip) { chip.classList.toggle('ok', message === ''); }
+    return message;
+  }
+
+  // ---------- Live ID card ----------
+  function initials(text) {
+    var parts = text.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) { return '?'; }
+    if (parts.length === 1) { return parts[0].charAt(0).toUpperCase(); }
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  function updateCard() {
+    var n = inputs.name.value.trim();
+    $('cardName').textContent = n === '' ? 'Your name here' : n;
+    $('cardName').classList.toggle('empty', n === '');
+    $('avatar').textContent = initials(n);
+    $('cardCourse').textContent = inputs.course.value === '' ? 'Course not chosen yet' : inputs.course.value;
+    $('cardEmail').textContent = inputs.email.value.trim() === '' ? '\u2014' : inputs.email.value.trim();
+    $('cardMobile').textContent = inputs.mobile.value.trim() === '' ? '\u2014' : inputs.mobile.value.trim();
+  }
+
+  // Password strength meter (advice only; the rule above decides validity)
+  function updateMeter() {
+    var v = inputs.password.value;
+    var score = 0;
+    if (v.length >= MIN_PASSWORD) { score++; }
+    if (v.length >= 12) { score++; }
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) { score++; }
+    if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) { score++; }
+    if (v === '') { score = 0; }
+    $('meter').className = 'meter' + (score ? ' s' + score : '');
+    $('meterText').textContent = ['Use letters and numbers. A symbol makes it stronger.', 'Weak', 'Fair', 'Good', 'Strong'][score];
+  }
+
+  // Validate a field after the user has visited it, and keep it updated as they type
+  for (var i = 0; i < order.length; i++) {
+    (function (key) {
+      var el = inputs[key];
+      var evt = (key === 'terms' || key === 'course') ? 'change' : 'input';
+
+      el.addEventListener('blur', function () { touched[key] = true; render(key); });
+      el.addEventListener(evt, function () {
+        updateCard();
+        if (key === 'password') {
+          updateMeter();
+          if (touched.confirm) { render('confirm'); }
+        }
+        if (touched[key]) { render(key); }
+      });
+    })(order[i]);
+  }
+
+  $('pwToggle').addEventListener('click', function () {
+    var hidden = inputs.password.type === 'password';
+    inputs.password.type = hidden ? 'text' : 'password';
+    inputs.confirm.type = inputs.password.type;
+    this.textContent = hidden ? 'Hide' : 'Show';
+    this.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
+  });
+
+  // ---------- STEPS 3, 4 and 6: handle submit ----------
+  function handleSubmit(event) {
+    event.preventDefault();                 // STEP 4: stop the browser's default submission
+
+    var errors = 0;
+    var firstBad = null;
+    for (var j = 0; j < order.length; j++) {
+      touched[order[j]] = true;
+      if (render(order[j]) !== '') {
+        errors++;
+        if (!firstBad) { firstBad = order[j]; }
+      }
+    }
+
+    var alertBox = $('alertBox');
+    if (errors > 0) {
+      alertBox.hidden = false;
+      alertBox.textContent = errors + (errors === 1 ? ' field needs' : ' fields need') + ' your attention before you can submit.';
+      inputs[firstBad].focus();
+      return;
+    }
+
+    alertBox.hidden = true;
+    showSuccess();
+  }
+
+  function showSuccess() {
+    var appNo = 'ADM26-' + String(Math.floor(10000 + Math.random() * 90000));
+    $('summary').innerHTML =
+      '<li><span>Application number</span><b>' + appNo + '</b></li>' +
+      '<li><span>Name</span><b></b></li>' +
+      '<li><span>Course</span><b></b></li>' +
+      '<li><span>Email</span><b></b></li>' +
+      '<li><span>Mobile</span><b></b></li>';
+    var cells = $('summary').querySelectorAll('b');
+    cells[1].textContent = inputs.name.value.trim();     // textContent keeps user text safe
+    cells[2].textContent = inputs.course.value;
+    cells[3].textContent = inputs.email.value.trim();
+    cells[4].textContent = inputs.mobile.value.trim();
+
+    $('formView').hidden = true;
+    $('successView').hidden = false;
+    $('appNo').textContent = appNo;
+    $('stamp').hidden = false;
+  }
+
+  // STEP 3: the submit event, plus a click on the button (Enter in a field also triggers that click)
+  form.addEventListener('submit', handleSubmit);
+  $('submitBtn').addEventListener('click', handleSubmit);
+
+  $('againBtn').addEventListener('click', function () {
+    form.reset();
+    touched = {};
+    for (var k = 0; k < order.length; k++) {
+      var box = $('f-' + order[k]);
+      box.classList.remove('valid', 'invalid');
+      $('e-' + order[k]).textContent = '';
+    }
+    var chips = document.querySelectorAll('.checks span');
+    for (var c = 0; c < chips.length; c++) { chips[c].classList.remove('ok'); }
+    inputs.password.type = 'password'; inputs.confirm.type = 'password';
+    $('pwToggle').textContent = 'Show';
+    updateCard(); updateMeter();
+    $('appNo').textContent = 'APPLICATION NUMBER PENDING';
+    $('stamp').hidden = true;
+    $('successView').hidden = true;
+    $('formView').hidden = false;
+    inputs.name.focus();
+  });
+
+  updateCard();
+  updateMeter();
+</script>
+</body>
+</html>

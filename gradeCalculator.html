@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practical Result Desk - Student Grade Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1F2A5C;
+  --blue: #1F3FBF;
+  --red: #E0312B;
+  --green: #17803D;
+  --grid: #D6E4F4;
+  --hl: #FFF176;
+  --muted: #5B6488;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Lexend', system-ui, sans-serif;
+  color: var(--ink);
+  line-height: 1.5;
+  /* graph paper */
+  background-color: #F7FAFD;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Header ---------- */
+.top { max-width: 1100px; margin: 0 auto; padding: 40px 20px 8px; }
+.top h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1; letter-spacing: -0.03em; }
+.top p { margin: 14px 0 0; max-width: 560px; color: var(--muted); }
+
+/* ---------- Layout ---------- */
+.desk {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+@media (min-width: 900px) {
+  .desk { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
+  .session { grid-column: 1 / -1; }
+}
+
+/* ---------- Marksheet (form) ---------- */
+.sheet {
+  position: relative;
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 28px 24px 28px 64px;
+  box-shadow: 0 10px 24px -12px rgba(31, 42, 92, .45);
+  /* ruled lines like a practical file */
+  background-image: repeating-linear-gradient(transparent 0, transparent 31px, #E6EEF8 31px, #E6EEF8 32px);
+}
+.sheet::before { /* margin line */
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: 40px;
+  border-left: 2px solid var(--red);
+  opacity: .6;
+}
+.sheet h2 { margin: 0 0 18px; font-size: 1.5rem; }
+
+.row.two { display: grid; gap: 0 18px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .row.two { grid-template-columns: 1.4fr 1fr; } }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-weight: 500; font-size: .95rem; }
+.opt { font-weight: 400; color: var(--muted); }
+.hint { margin: 22px 0 10px; font-family: 'Kalam', cursive; font-size: 1.25rem; color: var(--blue); }
+
+.field input {
+  width: 100%;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--blue);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  padding: 6px 4px;
+  border-radius: 0;
+}
+.field input::placeholder { color: #A0A8C6; }
+.field input:focus { outline: none; background: var(--hl); border-bottom-color: var(--blue); }
+
+/* subject rows: label on the left, mark on the right (wide screens) */
+@media (min-width: 560px) {
+  .field.subject { display: grid; grid-template-columns: 1fr 140px; column-gap: 16px; align-items: end; }
+  .field.subject label { grid-column: 1; grid-row: 1; padding-bottom: 6px; }
+  .field.subject input { grid-column: 2; grid-row: 1; }
+  .field.subject .error-msg { grid-column: 1 / -1; }
+}
+
+.error-msg { margin: 4px 0 0; min-height: 0; font-size: .85rem; color: var(--red); }
+.field.invalid input { border-bottom-color: var(--red); background: #FFE9E7; }
+
+.alert {
+  background: #FFE9E7; border: 2px solid var(--red); color: #9A1B16;
+  border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-weight: 500;
+}
+
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer;
+  padding: 12px 26px; border-radius: 999px; border: 2px solid var(--ink);
+  transition: transform .15s, background-color .2s, color .2s;
+}
+.btn:active { transform: scale(.96); }
+.btn:focus-visible { outline: 3px solid var(--hl); outline-offset: 2px; box-shadow: 0 0 0 5px var(--blue); }
+.btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn.primary:hover { background: var(--ink); border-color: var(--ink); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: #fff; }
+.btn.small { padding: 6px 16px; font-size: .85rem; }
+
+/* ---------- Result slip ---------- */
+.slip-wrap { display: flex; flex-direction: column; gap: 20px; }
+
+.placeholder {
+  border: 2px dashed var(--muted);
+  border-radius: 6px;
+  padding: 48px 24px;
+  text-align: center;
+  font-family: 'Kalam', cursive;
+  font-size: 1.5rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, .7);
+}
+
+.slip {
+  position: relative;
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 36px 24px 24px;
+  box-shadow: 0 10px 24px -12px rgba(31, 42, 92, .45);
+}
+.slip::before { /* piece of tape */
+  content: "";
+  position: absolute; top: -14px; left: 50%;
+  width: 110px; height: 28px; margin-left: -55px;
+  background: rgba(255, 241, 118, .85);
+  transform: rotate(-3deg);
+}
+.slip h3 { margin: 0; font-size: 1.4rem; }
+.slip .roll { margin: 0; color: var(--muted); font-size: .9rem; }
+
+.verdict { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px 0 8px; }
+
+.grade-mark { position: relative; width: 150px; height: 140px; flex: none; display: flex; align-items: center; justify-content: center; }
+.grade-mark span { font-family: 'Kalam', cursive; font-weight: 700; font-size: 4.8rem; line-height: 1; color: var(--red); }
+.grade-mark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.grade-mark ellipse {
+  fill: none; stroke: var(--red); stroke-width: 4; stroke-linecap: round;
+  stroke-dasharray: 420; stroke-dashoffset: 420;
+  animation: pen .9s ease-out .1s forwards;
+}
+@keyframes pen { to { stroke-dashoffset: 0; } }
+
+.stamp {
+  font-weight: 700; font-size: 1.6rem; letter-spacing: .08em;
+  padding: 6px 18px; border: 4px solid currentColor; border-radius: 6px;
+  transform: rotate(-7deg);
+  opacity: .9;
+}
+.stamp.pass { color: var(--green); }
+.stamp.fail { color: var(--red); }
+
+.remark { font-family: 'Kalam', cursive; font-size: 1.4rem; color: var(--red); margin: 0 0 18px; }
+
+.figures { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.figures div { background: #F1F6FC; border-radius: 6px; padding: 10px 14px; }
+.figures small { display: block; color: var(--muted); font-size: .8rem; }
+.figures b { font-size: 1.6rem; }
+
+.bars { display: grid; gap: 8px; margin-bottom: 20px; }
+.bar { display: grid; grid-template-columns: 110px 1fr 36px; gap: 10px; align-items: center; font-size: .85rem; }
+.bar .track { height: 12px; background: #E6EEF8; border-radius: 6px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--blue); border-radius: 6px; }
+.bar .fill.low { background: var(--red); }
+.bar b { text-align: right; }
+
+/* ---------- Rules ---------- */
+.rules { font-size: .85rem; color: var(--muted); background: rgba(255,255,255,.8); border-radius: 6px; padding: 12px 16px; }
+.rules p { margin: 2px 0; }
+
+/* ---------- Session list ---------- */
+.session { background: #fff; border: 2px solid var(--ink); border-radius: 6px; padding: 22px 24px; }
+.session-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.session h2 { margin: 0; font-size: 1.4rem; }
+.summary { margin: 6px 0 14px; color: var(--muted); font-size: .95rem; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 480px; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--grid); }
+th { font-size: .85rem; color: var(--muted); font-weight: 500; }
+td.g { font-family: 'Kalam', cursive; font-weight: 700; font-size: 1.3rem; color: var(--red); }
+td.pass { color: var(--green); font-weight: 700; }
+td.fail { color: var(--red); font-weight: 700; }
+td.empty { text-align: center; color: var(--muted); padding: 28px 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grade-mark ellipse { animation: none; stroke-dashoffset: 0; }
+  .btn { transition: none; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Marks in, grade out.</h1>
+  <p>Enter a student's practical marks, press calculate, and mark the next student. Every result stays on the list below until you clear it.</p>
+</header>
+
+<main class="desk">
+
+  <!-- STEP 1: form with numeric fields for each subject -->
+  <section class="sheet" aria-labelledby="formTitle">
+    <h2 id="formTitle">Marksheet</h2>
+
+    <form id="gradeForm" novalidate>
+      <div id="alertBox" class="alert" role="alert" hidden></div>
+
+      <div class="row two">
+        <div class="field">
+          <label for="studentName">Student name</label>
+          <input type="text" id="studentName" autocomplete="off" placeholder="e.g. Meera Kulkarni">
+          <p class="error-msg" id="e-name"></p>
+        </div>
+        <div class="field">
+          <label for="rollNo">Roll number <span class="opt">(optional)</span></label>
+          <input type="text" id="rollNo" autocomplete="off" placeholder="e.g. 24">
+        </div>
+      </div>
+
+      <p class="hint">Marks for each practical, out of 100</p>
+
+      <div class="field subject">
+        <label for="m1">Physics lab</label>
+        <input type="number" id="m1" inputmode="decimal" placeholder="0 to 100">
+        <p class="error-msg" id="e1"></p>
+      </div>
+      <div class="field subject">
+        <label for="m2">Chemistry lab</label>
+        <input type="number" id="m2" inputmode="decimal" placeholder="0 to 100">
+        <p class="error-msg" id="e2"></p>
+      </div>
+      <div class="field subject">
+        <label for="m3">Programming lab</label>
+        <input type="number" id="m3" inputmode="decimal" placeholder="0 to 100">
+        <p class="error-msg" id="e3"></p>
+      </div>
+      <div class="field subject">
+        <label for="m4">Electronics lab</label>
+        <input type="number" id="m4" inputmode="decimal" placeholder="0 to 100">
+        <p class="error-msg" id="e4"></p>
+      </div>
+      <div class="field subject">
+        <label for="m5">Workshop</label>
+        <input type="number" id="m5" inputmode="decimal" placeholder="0 to 100">
+        <p class="error-msg" id="e5"></p>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="calcBtn" class="btn primary">Calculate result</button>
+        <button type="button" id="resetBtn" class="btn ghost">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Result area: filled by the JavaScript below -->
+  <section class="slip-wrap" aria-live="polite">
+    <div id="result"></div>
+
+    <div class="rules">
+      <p><b>Grading scale</b></p>
+      <p>90 and above: A+ | 80 to 89: A | 70 to 79: B+ | 60 to 69: B | 50 to 59: C | 40 to 49: D | below 40: F</p>
+      <p>A student passes with 40 percent or more.</p>
+    </div>
+  </section>
+
+  <!-- Session list -->
+  <section class="session" aria-labelledby="sessionTitle">
+    <div class="session-head">
+      <h2 id="sessionTitle">This session</h2>
+      <button type="button" id="clearSession" class="btn ghost small">Clear list</button>
+    </div>
+    <p id="sessionSummary" class="summary"></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Total</th><th>Percentage</th><th>Grade</th><th>Result</th></tr>
+        </thead>
+        <tbody id="sessionBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ---------- Setup: select the elements we need ----------
+var form = document.getElementById('gradeForm');
+var alertBox = document.getElementById('alertBox');
+var resultBox = document.getElementById('result');
+var resetBtn = document.getElementById('resetBtn');
+var clearBtn = document.getElementById('clearSession');
+var sessionBody = document.getElementById('sessionBody');
+var sessionSummary = document.getElementById('sessionSummary');
+
+var subjectNames = ['Physics lab', 'Chemistry lab', 'Programming lab', 'Electronics lab', 'Workshop'];
+var MAX_PER_SUBJECT = 100;
+var PASS_PERCENT = 40;
+var session = [];   // results calculated in this sitting
+
+// Make user text safe before putting it into innerHTML
+function esc(text) {
+  return text.replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// ---------- STEP 5: if / else if / else ladder for the grade ----------
+function getGrade(percentage) {
+  var grade, remark;
+  if (percentage >= 90) {
+    grade = 'A+'; remark = 'Outstanding work!';
+  } else if (percentage >= 80) {
+    grade = 'A'; remark = 'Excellent, keep it up.';
+  } else if (percentage >= 70) {
+    grade = 'B+'; remark = 'Very good practical work.';
+  } else if (percentage >= 60) {
+    grade = 'B'; remark = 'Good. A little more care in the write-ups.';
+  } else if (percentage >= 50) {
+    grade = 'C'; remark = 'Satisfactory. Revise the weaker labs.';
+  } else if (percentage >= 40) {
+    grade = 'D'; remark = 'Just through. Practise more.';
+  } else {
+    grade = 'F'; remark = 'Needs a re-test. See me after class.';
+  }
+  return { grade: grade, remark: remark };
+}
+
+// ---------- Validation helpers ----------
+function showError(inputId, errorId, message) {
+  document.getElementById(inputId).parentElement.classList.add('invalid');
+  document.getElementById(errorId).textContent = message;
+}
+
+function clearErrors() {
+  var fields = document.querySelectorAll('.field');
+  for (var i = 0; i < fields.length; i++) { fields[i].classList.remove('invalid'); }
+  var msgs = document.querySelectorAll('.error-msg');
+  for (var j = 0; j < msgs.length; j++) { msgs[j].textContent = ''; }
+  alertBox.hidden = true;
+}
+
+// ---------- STEPS 4 and 5: read, parse, validate, calculate ----------
+function calculate() {
+  clearErrors();
+  var errors = 0;
+  var marks = [];
+  var total = 0;
+
+  var name = document.getElementById('studentName').value.trim();
+  var roll = document.getElementById('rollNo').value.trim();
+
+  if (name === '') {
+    showError('studentName', 'e-name', "Enter the student's name.");
+    errors++;
+  }
+
+  for (var i = 0; i < subjectNames.length; i++) {
+    var raw = document.getElementById('m' + (i + 1)).value.trim();
+    var value = parseFloat(raw);          // string -> number
+
+    if (raw === '' || isNaN(Number(raw)) || isNaN(value)) {
+      showError('m' + (i + 1), 'e' + (i + 1), 'Enter numeric marks for ' + subjectNames[i] + '.');
+      errors++;
+    } else if (value < 0 || value > MAX_PER_SUBJECT) {
+      showError('m' + (i + 1), 'e' + (i + 1), 'Marks must be between 0 and ' + MAX_PER_SUBJECT + '.');
+      errors++;
+    } else {
+      marks.push(value);
+      total = total + value;              // add numbers, not strings
+    }
+  }
+
+  if (errors > 0) {
+    alertBox.hidden = false;
+    alertBox.textContent = errors + (errors === 1 ? ' field needs' : ' fields need') +
+      ' attention before the result can be calculated.';
+    var firstBad = document.querySelector('.field.invalid input');
+    if (firstBad) { firstBad.focus(); }
+    return;
+  }
+
+  var maxTotal = subjectNames.length * MAX_PER_SUBJECT;
+  var percentage = (total / maxTotal) * 100;
+  var outcome = getGrade(percentage);
+  var passed = percentage >= PASS_PERCENT;
+
+  showResult(name, roll, marks, total, maxTotal, percentage, outcome, passed);
+
+  session.push({ name: name, roll: roll, total: total, maxTotal: maxTotal, percentage: percentage, grade: outcome.grade, passed: passed });
+  renderSession();
+}
+
+// ---------- STEP 6: render the result to the page ----------
+function showResult(name, roll, marks, total, maxTotal, percentage, outcome, passed) {
+  var bars = '';
+  for (var i = 0; i < marks.length; i++) {
+    bars += '<div class="bar"><span>' + subjectNames[i] + '</span>' +
+      '<div class="track"><div class="fill' + (marks[i] < PASS_PERCENT ? ' low' : '') + '" style="width:' + marks[i] + '%"></div></div>' +
+      '<b>' + marks[i] + '</b></div>';
+  }
+
+  resultBox.innerHTML =
+    '<article class="slip">' +
+      '<h3>' + esc(name) + '</h3>' +
+      '<p class="roll">' + (roll ? 'Roll number ' + esc(roll) : 'No roll number entered') + '</p>' +
+      '<div class="verdict">' +
+        '<div class="grade-mark"><span>' + outcome.grade + '</span>' +
+          '<svg viewBox="0 0 160 150" aria-hidden="true"><ellipse cx="80" cy="75" rx="70" ry="62" transform="rotate(-8 80 75)"/></svg></div>' +
+        '<div class="stamp ' + (passed ? 'pass' : 'fail') + '">' + (passed ? 'PASS' : 'FAIL') + '</div>' +
+      '</div>' +
+      '<p class="remark">' + outcome.remark + '</p>' +
+      '<div class="figures">' +
+        '<div><small>Total marks</small><b>' + total + ' / ' + maxTotal + '</b></div>' +
+        '<div><small>Percentage</small><b>' + percentage.toFixed(2) + '%</b></div>' +
+      '</div>' +
+      '<div class="bars">' + bars + '</div>' +
+      '<button type="button" class="btn primary" id="nextBtn">Next student</button>' +
+    '</article>';
+}
+
+function showPlaceholder() {
+  resultBox.innerHTML = '<div class="placeholder">Waiting for marks&hellip;</div>';
+}
+
+function renderSession() {
+  if (session.length === 0) {
+    sessionBody.innerHTML = '<tr><td class="empty" colspan="5">No results yet. Calculate a student to start the list.</td></tr>';
+    sessionSummary.textContent = '';
+    return;
+  }
+
+  var rows = '';
+  var sum = 0;
+  var passCount = 0;
+  for (var i = session.length - 1; i >= 0; i--) {   // newest first
+    var s = session[i];
+    rows += '<tr><td>' + esc(s.name) + (s.roll ? ' (' + esc(s.roll) + ')' : '') + '</td>' +
+      '<td>' + s.total + ' / ' + s.maxTotal + '</td>' +
+      '<td>' + s.percentage.toFixed(2) + '%</td>' +
+      '<td class="g">' + s.grade + '</td>' +
+      '<td class="' + (s.passed ? 'pass' : 'fail') + '">' + (s.passed ? 'Pass' : 'Fail') + '</td></tr>';
+  }
+  for (var k = 0; k < session.length; k++) {
+    sum += session[k].percentage;
+    if (session[k].passed) { passCount++; }
+  }
+  sessionBody.innerHTML = rows;
+  sessionSummary.textContent = session.length + (session.length === 1 ? ' student' : ' students') +
+    ' | Average ' + (sum / session.length).toFixed(2) + '% | ' + passCount + ' passed, ' + (session.length - passCount) + ' failed';
+}
+
+function startNext() {
+  form.reset();
+  clearErrors();
+  showPlaceholder();
+  document.getElementById('studentName').focus();
+}
+
+// ---------- STEP 3: bind events ----------
+var calcBtn = document.getElementById('calcBtn');
+
+// Click on the Calculate button
+calcBtn.addEventListener('click', function () {
+  calculate();
+});
+
+// Pressing Enter inside any field also calculates
+form.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
+    event.preventDefault();
+    calculate();
+  }
+});
+
+// Safety net: if the form is ever submitted, stop the page from reloading
+form.addEventListener('submit', function (event) {
+  event.preventDefault();
+  calculate();
+});
+
+resetBtn.addEventListener('click', startNext);
+
+resultBox.addEventListener('click', function (event) {
+  if (event.target.id === 'nextBtn') { startNext(); }
+});
+
+var clearTimer = null;
+clearBtn.addEventListener('click', function () {
+  if (session.length === 0) { return; }
+  if (clearBtn.textContent === 'Clear list') {
+    clearBtn.textContent = 'Click again to confirm';   // two-step confirm, no pop-up needed
+    clearTimer = setTimeout(function () { clearBtn.textContent = 'Clear list'; }, 3000);
+  } else {
+    clearTimeout(clearTimer);
+    clearBtn.textContent = 'Clear list';
+    session = [];
+    renderSession();
+  }
+});
+
+// First paint
+showPlaceholder();
+renderSession();
+
+</script>
+</body>
+</html>

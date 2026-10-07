@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bhatti - Wood-fired Indian Kitchen | Menu</title>
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { chili:'#D62F1F', mustard:'#F4B41A', leaf:'#2E8B57', coal:'#1A1A1A', chalk:'#F3F3F0' },
+      fontFamily: { display:['Anton','Impact','sans-serif'], body:['"Work Sans"','system-ui','sans-serif'] }
+    } }
+  }
+</script>
+</head>
+
+<body class="bg-chalk text-coal font-body antialiased">
+
+<header class="bg-chili text-white flex items-center justify-between px-5 sm:px-10 py-4">
+  <a href="#top" class="font-display text-3xl tracking-wide focus:outline-none focus:ring-4 focus:ring-mustard rounded">BHATTI</a>
+  <nav class="flex items-center gap-4 text-sm font-semibold">
+    <a href="#menu" class="hover:text-mustard transition-colors duration-300">Menu</a>
+    <a href="#visit" class="hidden sm:inline hover:text-mustard transition-colors duration-300">Opening hours</a>
+    <span class="bg-white text-chili rounded-full px-4 py-1.5">Now open</span>
+  </nav>
+</header>
+
+<main id="top">
+
+<!-- Hero -->
+<section class="bg-chili text-white px-5 sm:px-10 pt-6 pb-16 md:pb-24 overflow-hidden">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 items-center">
+    <div class="md:col-span-2">
+      <h1 class="font-display text-6xl sm:text-8xl lg:text-9xl leading-[0.92] tracking-wide">Wood-fired. Slow-cooked. Finally open.</h1>
+      <p class="mt-6 text-lg sm:text-xl max-w-xl">Our clay oven runs from noon till midnight. Here are the nine dishes our first guests keep ordering twice.</p>
+      <a href="#menu" class="inline-block mt-8 bg-mustard text-coal font-bold px-8 py-4 rounded-full hover:bg-white focus:outline-none focus:ring-4 focus:ring-white/50 active:scale-95 transition-all duration-300">See the menu</a>
+    </div>
+    <div class="flex justify-center md:justify-end">
+      <div class="rotate-6 bg-mustard text-coal w-52 h-52 sm:w-60 sm:h-60 rounded-full border-4 border-coal flex flex-col items-center justify-center text-center p-6">
+        <span class="font-display text-6xl leading-none">9</span>
+        <span class="font-bold leading-tight mt-2">dishes, all cooked to order over live coal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Menu section -->
+<section id="menu" class="px-5 sm:px-10 py-14 md:py-20 scroll-mt-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+      <div>
+        <h2 class="font-display text-5xl sm:text-6xl tracking-wide">The menu</h2>
+        <p id="count" class="mt-2 text-coal/70 font-medium"></p>
+      </div>
+      <div id="tabs" class="flex flex-wrap gap-2 text-sm font-semibold"></div>
+    </div>
+
+    <!-- CSS Grid: 1 column on mobile, 2 on md, 3 on lg -->
+    <div id="grid" class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+    <p class="mt-10 text-sm text-coal/60 flex items-center gap-3">
+      <span class="inline-flex w-5 h-5 border-2 border-green-700 rounded items-center justify-center bg-white"><span class="w-2.5 h-2.5 rounded-full bg-green-700"></span></span> Vegetarian
+      <span class="inline-flex w-5 h-5 border-2 border-chili rounded items-center justify-center bg-white ml-3"><span class="w-2.5 h-2.5 rounded-full bg-chili"></span></span> Contains meat
+    </p>
+  </div>
+</section>
+
+<!-- Hours -->
+<section id="visit" class="bg-coal text-white px-5 sm:px-10 py-14">
+  <div class="max-w-6xl mx-auto grid sm:grid-cols-3 gap-8">
+    <div><p class="font-display text-3xl text-mustard">Lunch</p><p class="mt-2">12:00 pm to 3:30 pm, every day</p></div>
+    <div><p class="font-display text-3xl text-mustard">Dinner</p><p class="mt-2">7:00 pm to 12:00 am, every day</p></div>
+    <div><p class="font-display text-3xl text-mustard">Tables</p><p class="mt-2">Walk-ins welcome. Groups of 6 or more should call ahead.</p></div>
+  </div>
+</section>
+</main>
+
+<!-- Order bar -->
+<div id="bar" class="hidden fixed bottom-4 inset-x-4 mx-auto max-w-xl z-50 items-center justify-between gap-4 bg-coal text-white rounded-full pl-6 pr-2 py-2 shadow-2xl border-2 border-mustard">
+  <span id="barText" class="font-semibold"></span>
+  <button id="send" class="bg-mustard text-coal font-bold px-6 py-2.5 rounded-full hover:bg-white active:scale-95 transition-all duration-300">Send to kitchen</button>
+</div>
+
+<script>
+  const svg = (bg, body) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="${bg}"/>${body}</svg>`);
+  const plate = `<circle cx="160" cy="96" r="78" fill="#000" opacity=".15"/><circle cx="160" cy="90" r="78" fill="#fff"/><circle cx="160" cy="90" r="64" fill="none" stroke="#e4e4e4" stroke-width="3"/>`;
+  const cubes = ['#E8841A','#2E8B57','#E8841A','#B5262B','#E8841A'].map((c, i) =>
+    `<rect x="${97 + i * 25}" y="77" width="26" height="26" rx="6" fill="${c}"/>`).join('');
+
+  const art = {
+    tikka: svg('#F4B41A', plate + `<line x1="85" y1="90" x2="235" y2="90" stroke="#9c7a54" stroke-width="4"/>` + cubes + `<circle cx="212" cy="138" r="10" fill="#7BC47F"/>`),
+    seekh: svg('#2E8B57', plate + `<rect x="92" y="60" width="130" height="22" rx="11" fill="#8A4B2A"/><rect x="100" y="88" width="130" height="22" rx="11" fill="#9A5731"/><rect x="92" y="116" width="130" height="22" rx="11" fill="#8A4B2A"/><path d="M200 150a20 20 0 0 1 40 0z" fill="#9BD33E"/><circle cx="108" cy="150" r="9" fill="none" stroke="#C2185B" stroke-width="4"/>`),
+    hara: svg('#D62F1F', plate + `<circle cx="130" cy="92" r="24" fill="#4E8F3A"/><circle cx="182" cy="72" r="24" fill="#58A044"/><circle cx="192" cy="118" r="24" fill="#4E8F3A"/><circle cx="125" cy="86" r="4" fill="#8FCB6B"/><circle cx="188" cy="68" r="4" fill="#8FCB6B"/><circle cx="198" cy="114" r="4" fill="#8FCB6B"/>`),
+    butter: svg('#F4B41A', plate + `<circle cx="160" cy="90" r="56" fill="#D9541E"/><path d="M118 90q42-34 84 0" stroke="#FFE9C7" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="135" cy="112" r="10" fill="#A63A12"/><circle cx="178" cy="116" r="10" fill="#A63A12"/><circle cx="196" cy="86" r="9" fill="#A63A12"/><circle cx="150" cy="70" r="4" fill="#2E7D32"/><circle cx="170" cy="64" r="4" fill="#2E7D32"/>`),
+    dal: svg('#1A1A1A', plate + `<circle cx="160" cy="90" r="56" fill="#5A2A14"/><path d="M120 96q40-36 80 0" stroke="#FFF1D6" stroke-width="8" fill="none" stroke-linecap="round"/><rect x="150" y="74" width="24" height="17" rx="3" fill="#FFD54F"/><circle cx="130" cy="112" r="3" fill="#2E7D32"/><circle cx="188" cy="112" r="3" fill="#2E7D32"/>`),
+    biryani: svg('#2E8B57', plate + `<ellipse cx="160" cy="96" rx="58" ry="42" fill="#F0C24B"/><circle cx="135" cy="85" r="6" fill="#8B4513"/><circle cx="175" cy="75" r="5" fill="#2E7D32"/><circle cx="190" cy="100" r="7" fill="#C62828"/><circle cx="150" cy="112" r="5" fill="#2E7D32"/><circle cx="125" cy="105" r="5" fill="#C62828"/><circle cx="168" cy="105" r="6" fill="#8B4513"/><circle cx="160" cy="60" r="4" fill="#fff"/>`),
+    naan: svg('#D62F1F', plate + `<ellipse cx="143" cy="95" rx="54" ry="38" fill="#E9C48C" transform="rotate(-18 143 95)"/><ellipse cx="183" cy="90" rx="50" ry="36" fill="#DDB171" transform="rotate(14 183 90)"/><circle cx="130" cy="95" r="4" fill="#7A4A1E"/><circle cx="160" cy="80" r="3" fill="#7A4A1E"/><circle cx="190" cy="95" r="4" fill="#7A4A1E"/><circle cx="200" cy="75" r="3" fill="#7A4A1E"/><rect x="150" y="88" width="20" height="14" rx="3" fill="#FFD54F"/>`),
+    jamun: svg('#F4B41A', plate + `<circle cx="160" cy="90" r="54" fill="#E6A23C"/><circle cx="138" cy="84" r="17" fill="#5B2410"/><circle cx="182" cy="84" r="17" fill="#5B2410"/><circle cx="160" cy="116" r="17" fill="#5B2410"/><circle cx="133" cy="78" r="4" fill="#fff" opacity=".5"/><circle cx="177" cy="78" r="4" fill="#fff" opacity=".5"/><circle cx="155" cy="110" r="4" fill="#fff" opacity=".5"/><circle cx="160" cy="62" r="3" fill="#7BC47F"/>`),
+    chaas: svg('#1A1A1A', `<path d="M122 36h76l-10 118h-56z" fill="#FFF8E1"/><path d="M126 70h68l-6 84h-56z" fill="#F2E3B3"/><rect x="170" y="14" width="8" height="90" rx="4" fill="#D62F1F" transform="rotate(12 174 60)"/><ellipse cx="145" cy="40" rx="14" ry="7" fill="#2E8B57"/><ellipse cx="170" cy="36" rx="12" ry="6" fill="#3AA66B"/>`)
+  };
+
+  const dishes = [
+    { name:'Paneer tikka', cat:'Starters', veg:true, price:320, spice:2, art:'tikka', top:true, desc:'Cottage cheese cubes marinated in hung curd and ajwain, charred in the clay oven with peppers.' },
+    { name:'Chicken seekh kebab', cat:'Starters', veg:false, price:360, spice:3, art:'seekh', desc:'Minced chicken with green chilli and mint, pressed on skewers and cooked over open coal.' },
+    { name:'Hara bhara kebab', cat:'Starters', veg:true, price:280, spice:1, art:'hara', desc:'Spinach, peas and potato patties with a crisp crust, served with mint chutney.' },
+    { name:'Butter chicken', cat:'Mains', veg:false, price:420, spice:1, art:'butter', top:true, desc:'Tandoor-roasted chicken in a smooth tomato and butter gravy finished with cream.' },
+    { name:'Dal makhani', cat:'Mains', veg:true, price:280, spice:1, art:'dal', desc:'Black lentils simmered overnight on low heat, finished with white butter.' },
+    { name:'Hyderabadi dum biryani', cat:'Mains', veg:false, price:390, spice:3, art:'biryani', desc:'Basmati and marinated chicken sealed in a pot and cooked slowly on dum.' },
+    { name:'Garlic butter naan', cat:'Sides and sweets', veg:true, price:90, spice:0, art:'naan', desc:'Soft naan blistered on the tandoor wall and brushed with garlic butter.' },
+    { name:'Gulab jamun', cat:'Sides and sweets', veg:true, price:150, spice:0, art:'jamun', desc:'Two warm khoya dumplings soaked in cardamom syrup, topped with pistachio.' },
+    { name:'Masala chaas', cat:'Sides and sweets', veg:true, price:90, spice:0, art:'chaas', desc:'Chilled spiced buttermilk with roasted cumin, mint and a pinch of black salt.' }
+  ];
+  const cats = ['All', 'Starters', 'Mains', 'Sides and sweets'];
+  let cat = 'All', items = 0, total = 0;
+
+  const $ = id => document.getElementById(id);
+
+  function spice(n) {
+    if (!n) return '<span class="text-sm text-coal/60">Not spicy</span>';
+    return '<span class="flex items-center gap-1" title="Spice level ' + n + ' of 3">' +
+      [1, 2, 3].map(i => `<span class="w-3.5 h-3.5 rounded-full ${i <= n ? 'bg-chili' : 'bg-slate-200'}"></span>`).join('') + '</span>';
+  }
+
+  function render() {
+    const list = dishes.filter(d => cat === 'All' || d.cat === cat);
+    $('grid').innerHTML = list.map(d => `
+      <article class="group flex flex-col justify-between bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+        <div class="relative">
+          <div class="aspect-video overflow-hidden">
+            <img src="${art[d.art]}" alt="${d.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <span class="absolute top-3 left-3 w-6 h-6 bg-white rounded border-2 ${d.veg ? 'border-green-700' : 'border-chili'} flex items-center justify-center" title="${d.veg ? 'Vegetarian' : 'Contains meat'}">
+            <span class="w-3 h-3 rounded-full ${d.veg ? 'bg-green-700' : 'bg-chili'}"></span>
+          </span>
+          ${d.top ? '<span class="absolute top-3 right-3 bg-coal text-white text-xs font-bold px-3 py-1 rounded-full">Most ordered</span>' : ''}
+          <span class="absolute -bottom-5 right-4 -rotate-6 bg-mustard text-coal font-display text-2xl tracking-wide px-4 py-1.5 rounded-full border-2 border-coal">Rs. ${d.price}</span>
+        </div>
+        <div class="flex flex-col justify-between gap-5 p-5 pt-8 flex-1">
+          <div>
+            <h3 class="font-display text-3xl tracking-wide">${d.name}</h3>
+            <p class="mt-2 text-coal/70 leading-relaxed">${d.desc}</p>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            ${spice(d.spice)}
+            <button data-price="${d.price}" class="order bg-coal text-white font-bold px-6 py-2.5 rounded-full hover:bg-chili focus:outline-none focus:ring-4 focus:ring-chili/30 active:scale-95 transition-all duration-300">Order now</button>
+          </div>
+        </div>
+      </article>`).join('');
+
+    $('count').textContent = list.length + ' dishes, all made fresh to order';
+    $('tabs').innerHTML = cats.map(c => `<button data-c="${c}" class="px-5 py-2 rounded-full border-2 border-coal transition-colors duration-300 ${c === cat ? 'bg-coal text-white' : 'hover:bg-mustard'}">${c}</button>`).join('');
+  }
+
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    cat = b.dataset.c; render();
+  });
+
+  function bar() {
+    const el = $('bar');
+    el.classList.toggle('hidden', items === 0);
+    el.classList.toggle('flex', items > 0);
+    $('barText').textContent = items + (items === 1 ? ' dish' : ' dishes') + ' | Rs. ' + total;
+  }
+
+  $('grid').addEventListener('click', e => {
+    const b = e.target.closest('.order'); if (!b) return;
+    items++; total += +b.dataset.price; bar();
+    b.textContent = 'Added'; setTimeout(() => b.textContent = 'Order now', 1200);
+  });
+
+  $('send').addEventListener('click', () => {
+    $('barText').textContent = 'Order sent to the kitchen';
+    setTimeout(() => { items = 0; total = 0; bar(); }, 1800);
+  });
+
+  render();
+</script>
+</body>
+</html>

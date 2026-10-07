@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Docket - Personal To-Do List</title>
+<!-- STEP 1: Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { sun:'#FFD400', ink:'#111111', paper:'#FFFEFA', study:'#2D5BFF', personal:'#FF3D8B' },
+      fontFamily: { display:['"Archivo Black"','Impact','sans-serif'], receipt:['"Courier Prime"','"Courier New"','monospace'] }
+    } }
+  }
+</script>
+</head>
+
+<body class="bg-sun text-ink font-receipt min-h-screen antialiased">
+
+<div class="max-w-5xl mx-auto px-5 pt-10 pb-20 md:grid md:grid-cols-5 md:gap-14 md:items-start">
+
+  <!-- Left: title -->
+  <header class="md:col-span-2 md:sticky md:top-10 mb-10 md:mb-0">
+    <h1 class="font-display text-6xl sm:text-7xl md:text-8xl leading-[0.9] tracking-tight">Today, sorted.</h1>
+    <p id="today" class="mt-5 text-xl font-bold"></p>
+    <p class="mt-2 text-lg max-w-xs">Write down what needs doing, tick it off when it is done, and delete what no longer matters.</p>
+  </header>
+
+  <!-- Right: the receipt -->
+  <main class="md:col-span-3 drop-shadow-[7px_9px_0_#111111]">
+
+    <!-- jagged top edge -->
+    <svg class="block w-full h-3 text-paper rotate-180" aria-hidden="true" preserveAspectRatio="none">
+      <defs><pattern id="zz" width="16" height="12" patternUnits="userSpaceOnUse"><path d="M0 0H16L8 12Z" fill="currentColor"/></pattern></defs>
+      <rect width="100%" height="12" fill="url(#zz)"/>
+    </svg>
+
+    <section class="bg-paper px-5 sm:px-8 py-6">
+
+      <div class="text-center">
+        <h2 class="font-bold text-xl tracking-[0.2em]">Daily docket</h2>
+        <p id="receiptDate" class="text-sm text-ink/70"></p>
+      </div>
+      <div class="my-5 border-t-2 border-dashed border-ink/40"></div>
+
+      <!-- STEP 1: input, category, add button -->
+      <label for="taskInput" class="block font-bold mb-2">What needs doing?</label>
+      <input id="taskInput" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Finish chemistry journal"
+             class="w-full bg-white border-2 border-ink px-4 py-3 text-lg placeholder:text-ink/40 focus:outline-none focus:ring-4 focus:ring-study/40 focus:border-study transition-colors">
+      <p id="error" class="text-personal font-bold text-sm mt-1 min-h-[1.25rem]" role="alert"></p>
+
+      <div class="flex flex-col sm:flex-row gap-3 mt-2">
+        <div class="flex border-2 border-ink" role="group" aria-label="Task type">
+          <button type="button" data-cat="study" class="cat flex-1 sm:flex-none px-4 py-2.5 font-bold flex items-center justify-center gap-2 transition-colors">
+            <span class="w-3 h-3 rounded-full bg-study border-2 border-white"></span>Study
+          </button>
+          <button type="button" data-cat="personal" class="cat flex-1 sm:flex-none px-4 py-2.5 font-bold flex items-center justify-center gap-2 border-l-2 border-ink transition-colors">
+            <span class="w-3 h-3 rounded-full bg-personal border-2 border-white"></span>Personal
+          </button>
+        </div>
+        <button id="addBtn" type="button" class="flex-1 bg-ink text-white font-bold text-lg px-6 py-2.5 hover:bg-study focus:outline-none focus:ring-4 focus:ring-study/40 active:scale-95 transition-all duration-200">Add task</button>
+      </div>
+
+      <div class="my-6 border-t-2 border-dashed border-ink/40"></div>
+
+      <!-- Filters -->
+      <div id="filters" class="flex gap-5 text-base mb-2">
+        <button type="button" data-filter="all" class="f pb-1">All</button>
+        <button type="button" data-filter="study" class="f pb-1">Study</button>
+        <button type="button" data-filter="personal" class="f pb-1">Personal</button>
+      </div>
+
+      <!-- STEP 1: empty list container -->
+      <ul id="list" class="divide-y-2 divide-dashed divide-ink/25"></ul>
+
+      <p id="emptyMsg" class="py-8 text-center text-ink/60"></p>
+
+      <div class="my-6 border-t-2 border-dashed border-ink/40"></div>
+
+      <!-- Totals -->
+      <dl class="space-y-1.5 text-lg">
+        <div class="flex items-end gap-2"><dt>Items</dt><span class="flex-1 border-b-2 border-dotted border-ink/40 mb-1.5"></span><dd id="totalCount" class="font-bold">0</dd></div>
+        <div class="flex items-end gap-2"><dt>Done</dt><span class="flex-1 border-b-2 border-dotted border-ink/40 mb-1.5"></span><dd id="doneCount" class="font-bold">0</dd></div>
+        <div class="flex items-end gap-2"><dt>Left to do</dt><span class="flex-1 border-b-2 border-dotted border-ink/40 mb-1.5"></span><dd id="leftCount" class="font-bold text-2xl">0</dd></div>
+      </dl>
+
+      <div class="mt-4 h-4 border-2 border-ink bg-white" role="progressbar" aria-label="Tasks completed" aria-valuemin="0" aria-valuemax="100" id="progressBar" aria-valuenow="0">
+        <div id="progressFill" class="h-full bg-study transition-all duration-500" style="width:0%"></div>
+      </div>
+      <p id="statusMsg" class="mt-2 text-sm font-bold min-h-[1.25rem]"></p>
+
+      <div class="mt-4 flex justify-between items-center">
+        <button id="clearDone" type="button" class="underline underline-offset-4 hover:text-personal font-bold">Clear completed</button>
+        <span class="text-xs text-ink/50">Saved on this device</span>
+      </div>
+
+      <div class="mt-6 h-9 bg-[repeating-linear-gradient(90deg,#111_0_2px,transparent_2px_5px,#111_5px_6px,transparent_6px_9px,#111_9px_12px,transparent_12px_14px)]" aria-hidden="true"></div>
+      <p class="text-center text-sm mt-2 text-ink/70">Thank you for getting things done.</p>
+    </section>
+
+    <!-- jagged bottom edge -->
+    <svg class="block w-full h-3 text-paper" aria-hidden="true" preserveAspectRatio="none">
+      <rect width="100%" height="12" fill="url(#zz)"/>
+    </svg>
+  </main>
+</div>
+
+<script>
+  // ---------- Setup ----------
+  var taskInput = document.getElementById('taskInput');
+  var addBtn = document.getElementById('addBtn');
+  var list = document.getElementById('list');
+  var errorBox = document.getElementById('error');
+  var emptyMsg = document.getElementById('emptyMsg');
+  var cats = { study: { label: 'Study', color: 'bg-study' }, personal: { label: 'Personal', color: 'bg-personal' } };
+
+  var tasks = [];              // state: every task and whether it is done
+  var selectedCat = 'study';   // which type the next task will get
+  var filter = 'all';          // which type is currently shown
+  var STORE_KEY = 'daily-docket-tasks';
+
+  // Today's date in the header and on the receipt
+  var today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('today').textContent = today;
+  document.getElementById('receiptDate').textContent = today;
+
+  // ---------- Saving (wrapped so the app still works if storage is blocked) ----------
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(tasks)); } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw !== null) { return JSON.parse(raw); }
+    } catch (e) {}
+    return null;
+  }
+
+  // ---------- STEP 4: build one task element with createElement ----------
+  function createTaskElement(task) {
+    var li = document.createElement('li');
+    li.dataset.id = task.id;
+    li.dataset.cat = task.cat;
+    li.className = 'flex items-center gap-3 py-3 transition-all duration-200';
+
+    // completion control
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.dataset.action = 'toggle';
+    toggle.setAttribute('aria-label', 'Mark task as done');
+    toggle.className = 'shrink-0 w-7 h-7 border-2 border-ink bg-white flex items-center justify-center hover:bg-sun focus:outline-none focus:ring-4 focus:ring-study/40 transition-colors';
+    var tick = document.createElement('span');
+    tick.className = 'tick font-bold leading-none pointer-events-none' + (task.done ? '' : ' opacity-0');
+    tick.textContent = '\u2713';
+    toggle.appendChild(tick);
+
+    // task text (textContent keeps user input safe)
+    var text = document.createElement('span');
+    text.className = 'task-text flex-1 text-lg break-words min-w-0' + (task.done ? ' line-through text-gray-400' : '');
+    text.textContent = task.text;
+
+    // category tag
+    var tag = document.createElement('span');
+    tag.className = 'shrink-0 text-xs font-bold text-white px-2 py-0.5 ' + cats[task.cat].color;
+    tag.textContent = cats[task.cat].label;
+
+    // delete control
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.dataset.action = 'delete';
+    del.setAttribute('aria-label', 'Delete task');
+    del.className = 'shrink-0 w-8 h-8 text-2xl leading-none hover:bg-personal hover:text-white focus:outline-none focus:ring-4 focus:ring-personal/40 transition-colors';
+    del.textContent = '\u00D7';
+
+    li.appendChild(toggle);
+    li.appendChild(text);
+    li.appendChild(tag);
+    li.appendChild(del);
+    return li;
+  }
+
+  // ---------- Counts, progress and messages ----------
+  function updateStats() {
+    var total = tasks.length;
+    var done = 0;
+    var visible = 0;
+    for (var i = 0; i < tasks.length; i++) {
+      if (tasks[i].done) { done++; }
+      if (filter === 'all' || tasks[i].cat === filter) { visible++; }
+    }
+    var left = total - done;
+    var pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('leftCount').textContent = left;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressBar').setAttribute('aria-valuenow', pct);
+
+    var status = '';
+    if (total > 0 && left === 0) { status = 'Everything is done. Take a break.'; }
+    else if (total > 0) { status = pct + '% done so far.'; }
+    document.getElementById('statusMsg').textContent = status;
+
+    if (visible === 0) {
+      emptyMsg.textContent = total === 0 ? 'Nothing on the docket yet. Add your first task above.' : 'No ' + filter + ' tasks here.';
+      emptyMsg.classList.remove('hidden');
+    } else {
+      emptyMsg.classList.add('hidden');
+    }
+  }
+
+  // Show or hide rows to match the selected filter
+  function applyFilter() {
+    var rows = list.children;
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.toggle('hidden', filter !== 'all' && rows[i].dataset.cat !== filter);
+    }
+    var buttons = document.querySelectorAll('.f');
+    for (var j = 0; j < buttons.length; j++) {
+      var on = buttons[j].dataset.filter === filter;
+      buttons[j].classList.toggle('border-b-4', true);
+      buttons[j].classList.toggle('border-ink', on);
+      buttons[j].classList.toggle('font-bold', on);
+      buttons[j].classList.toggle('border-transparent', !on);
+      buttons[j].classList.toggle('text-ink/60', !on);
+    }
+    updateStats();
+  }
+
+  function paintCategoryButtons() {
+    var buttons = document.querySelectorAll('.cat');
+    for (var i = 0; i < buttons.length; i++) {
+      var on = buttons[i].dataset.cat === selectedCat;
+      buttons[i].classList.toggle('bg-ink', on);
+      buttons[i].classList.toggle('text-white', on);
+      buttons[i].classList.toggle('bg-white', !on);
+    }
+  }
+
+  // ---------- STEPS 3, 4 and 6: add a task ----------
+  function addTask() {
+    var value = taskInput.value.trim();           // STEP 3: read and check the input
+
+    if (value === '') {
+      errorBox.textContent = 'Type a task first.';
+      taskInput.classList.add('border-personal');
+      taskInput.focus();
+      return;
+    }
+    errorBox.textContent = '';
+    taskInput.classList.remove('border-personal');
+
+    var task = { id: Date.now(), text: value, cat: selectedCat, done: false };
+    tasks.push(task);
+    list.appendChild(createTaskElement(task));    // STEP 6: append the new row
+
+    taskInput.value = '';                         // reset for the next entry
+    taskInput.focus();
+    save();
+    applyFilter();
+  }
+
+  addBtn.addEventListener('click', addTask);
+  taskInput.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') { event.preventDefault(); addTask(); }
+  });
+  taskInput.addEventListener('input', function () {
+    if (taskInput.value.trim() !== '') {
+      errorBox.textContent = '';
+      taskInput.classList.remove('border-personal');
+    }
+  });
+
+  // ---------- STEP 5: one click listener on the list (event delegation) ----------
+  list.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-action]');
+    if (!button) { return; }
+
+    var li = button.closest('li');
+    var id = Number(li.dataset.id);
+    var task = tasks.find(function (t) { return t.id === id; });
+    if (!task) { return; }
+
+    if (button.dataset.action === 'toggle') {
+      task.done = !task.done;
+      li.querySelector('.task-text').classList.toggle('line-through');   // toggle the done styling
+      li.querySelector('.task-text').classList.toggle('text-gray-400');
+      li.querySelector('.tick').classList.toggle('opacity-0');
+      button.setAttribute('aria-label', task.done ? 'Mark task as not done' : 'Mark task as done');
+      save();
+      updateStats();
+    }
+
+    if (button.dataset.action === 'delete') {
+      tasks = tasks.filter(function (t) { return t.id !== id; });
+      li.classList.add('opacity-0', '-translate-x-6');                    // slide out first
+      setTimeout(function () { li.remove(); }, 200);                      // then remove the node
+      save();
+      updateStats();
+    }
+  });
+
+  // ---------- Category buttons, filter buttons, clear completed ----------
+  document.querySelector('.cat').parentElement.addEventListener('click', function (event) {
+    var b = event.target.closest('.cat');
+    if (!b) { return; }
+    selectedCat = b.dataset.cat;
+    paintCategoryButtons();
+  });
+
+  document.getElementById('filters').addEventListener('click', function (event) {
+    var b = event.target.closest('.f');
+    if (!b) { return; }
+    filter = b.dataset.filter;
+    applyFilter();
+  });
+
+  document.getElementById('clearDone').addEventListener('click', function () {
+    var rows = Array.prototype.slice.call(list.children);
+    rows.forEach(function (li) {
+      var id = Number(li.dataset.id);
+      var task = tasks.find(function (t) { return t.id === id; });
+      if (task && task.done) { li.remove(); }
+    });
+    tasks = tasks.filter(function (t) { return !t.done; });
+    save();
+    updateStats();
+  });
+
+  // ---------- First load ----------
+  var saved = load();
+  if (saved === null) {      // first visit: a few examples so the page is not empty
+    saved = [
+      { id: 1, text: 'Finish physics lab journal', cat: 'study', done: false },
+      { id: 2, text: 'Revise DBMS unit 3', cat: 'study', done: false },
+      { id: 3, text: 'Call home on Sunday', cat: 'personal', done: true }
+    ];
+  }
+  tasks = saved;
+  for (var n = 0; n < tasks.length; n++) { list.appendChild(createTaskElement(tasks[n])); }
+
+  paintCategoryButtons();
+  applyFilter();
+</script>
+</body>
+</html>

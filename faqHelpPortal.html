@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Department Help Line - Frequently Asked Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- STEP 2: CSS - collapsed and active (expanded) states -->
+<style>
+  :root {
+    --ink: #17181C;
+    --muted: #5A5F6E;
+    --bg: #F1F3F8;
+    --magenta: #D6246E;
+    --blue: #1565D8;
+    --green: #12945A;
+    --amber: #F29F05;
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Barlow', system-ui, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+
+  /* four-colour stripe across the top */
+  .stripe { display: flex; height: 12px; }
+  .stripe span { flex: 1; }
+  .stripe span:nth-child(1) { background: var(--magenta); }
+  .stripe span:nth-child(2) { background: var(--blue); }
+  .stripe span:nth-child(3) { background: var(--green); }
+  .stripe span:nth-child(4) { background: var(--amber); }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- Header ---------- */
+  header { padding: 44px 0 20px; }
+  h1 {
+    margin: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: clamp(3.2rem, 11vw, 6.5rem);
+    line-height: .88;
+    letter-spacing: -0.01em;
+  }
+  header p { margin: 16px 0 0; max-width: 520px; color: var(--muted); font-size: 1.15rem; }
+
+  /* ---------- Controls ---------- */
+  .controls { display: flex; flex-direction: column; gap: 14px; padding: 14px 0 6px; }
+  .search {
+    width: 100%; font: inherit; font-size: 1.05rem;
+    padding: 13px 20px; border: 2px solid var(--ink); border-radius: 999px;
+    background: #fff; color: var(--ink);
+  }
+  .search:focus { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip, .tool {
+    font: inherit; font-weight: 600; font-size: .95rem; cursor: pointer;
+    padding: 7px 16px; border-radius: 999px; border: 2px solid var(--ink);
+    background: #fff; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background-color .2s, color .2s, transform .15s;
+  }
+  .chip:hover, .tool:hover { background: var(--ink); color: #fff; }
+  .chip:active, .tool:active { transform: scale(.96); }
+  .chip.on { background: var(--ink); color: #fff; }
+  .chip i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .chip:focus-visible, .tool:focus-visible, .faq-question:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  .meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: .95rem; }
+  .tools { display: flex; gap: 8px; }
+  .tool { padding: 5px 14px; font-size: .88rem; }
+
+  /* ---------- Lines (categories) ---------- */
+  .line { margin-top: 38px; padding-left: 52px; }
+  .line.hidden, .faq-item.hidden { display: none; }
+
+  .line-title {
+    display: flex; align-items: center; gap: 12px;
+    margin: 0 0 6px -52px;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 2rem; line-height: 1;
+  }
+  .badge {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--c); color: #fff; font-size: 1.3rem;
+  }
+  .line[data-line="fees"] .badge, .line[data-line="labs"] .badge { color: var(--ink); }
+  .line[data-line="fees"] .badge { color: #fff; }
+
+  /* ---------- FAQ item ---------- */
+  .faq-item { position: relative; border-bottom: 1px solid #D9DDE8; }
+  .faq-item:last-child, .faq-item.is-last { border-bottom: 0; }
+
+  /* station dot */
+  .faq-item::before {
+    content: "";
+    position: absolute; left: -40px; top: 22px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; border: 5px solid var(--c);
+    z-index: 1;
+    transition: background-color .25s, transform .25s;
+  }
+  /* rail down to the next station */
+  .faq-item::after {
+    content: "";
+    position: absolute; left: -33px; top: 33px; bottom: -33px;
+    width: 8px; background: var(--c); z-index: 0;
+  }
+  .faq-item.is-last::after, .faq-item:last-child::after { display: none; }
+
+  .faq-item.active::before { background: var(--c); transform: scale(1.2); }
+
+  .faq-question {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    text-align: left; font: inherit; font-weight: 600; font-size: 1.2rem; line-height: 1.3;
+    color: var(--ink); background: none; border: 0; cursor: pointer;
+    padding: 18px 0;
+    transition: color .2s;
+  }
+  .faq-question:hover, .faq-item.active .faq-question { color: var(--t); }
+
+  /* chevron */
+  .chev {
+    flex: none; width: 12px; height: 12px;
+    border-right: 3px solid currentColor; border-bottom: 3px solid currentColor;
+    transform: rotate(45deg); margin-top: -4px;
+    transition: transform .3s;
+  }
+  .faq-item.active .chev { transform: rotate(-135deg); margin-top: 4px; }
+
+  /* collapsed answer: height animates from 0 to auto using grid rows */
+  .faq-answer {
+    display: grid; grid-template-rows: 0fr; visibility: hidden;
+    transition: grid-template-rows .35s ease, visibility .35s;
+  }
+  .faq-answer-inner { overflow: hidden; }
+  .faq-answer-inner p { margin: 0 0 20px; max-width: 60ch; color: #3B3F4D; }
+
+  /* expanded answer */
+  .faq-item.active .faq-answer { grid-template-rows: 1fr; visibility: visible; }
+
+  /* line colours */
+  .line[data-line="enrol"] { --c: var(--magenta); --t: #B01A58; }
+  .line[data-line="exams"] { --c: var(--blue);    --t: #0F51B0; }
+  .line[data-line="fees"]  { --c: var(--green);   --t: #0B7A48; }
+  .line[data-line="labs"]  { --c: var(--amber);   --t: #A86400; }
+
+  .empty { display: none; margin-top: 40px; padding: 28px; text-align: center; background: #fff; border: 2px dashed var(--muted); border-radius: 12px; color: var(--muted); }
+  .empty.show { display: block; }
+
+  /* ---------- Last stop ---------- */
+  .terminus {
+    margin: 56px 0 60px; padding: 28px;
+    background: var(--ink); color: #fff; border-radius: 20px;
+  }
+  .terminus h2 { margin: 0 0 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; line-height: 1; }
+  .terminus p { margin: 4px 0; color: #D5D8E3; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-answer, .chev, .faq-item::before, .chip, .tool { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stripe"><span></span><span></span><span></span><span></span></div>
+
+<header>
+  <div class="wrap">
+    <h1>Department help line</h1>
+    <p>Pick a line, tap a question and the answer opens right below it. Nothing to log in to.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="controls">
+    <label for="search" class="sr" style="position:absolute;left:-9999px">Search questions</label>
+    <input id="search" class="search" type="search" placeholder="Search a question, e.g. hall ticket" autocomplete="off">
+    <div class="chips" id="chips">
+      <button class="chip on" data-line="all" type="button">All lines</button>
+      <button class="chip" data-line="enrol" type="button"><i style="background:var(--magenta)"></i>Enrolment</button>
+      <button class="chip" data-line="exams" type="button"><i style="background:var(--blue)"></i>Exams</button>
+      <button class="chip" data-line="fees" type="button"><i style="background:var(--green)"></i>Fees</button>
+      <button class="chip" data-line="labs" type="button"><i style="background:var(--amber)"></i>Labs and library</button>
+    </div>
+    <div class="meta">
+      <span id="count"></span>
+      <span class="tools">
+        <button id="openAll" class="tool" type="button">Open all</button>
+        <button id="closeAll" class="tool" type="button">Close all</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- STEP 1: HTML structure - question buttons followed by hidden answer blocks -->
+  <section class="line" data-line="enrol">
+    <h2 class="line-title"><span class="badge">1</span>Enrolment</h2>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>Where do I collect my student ID card?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Collect it from the department office (Room 204) between 10 am and 4 pm. Bring your admission receipt and one passport photo. Cards are ready within three working days. A lost card can be replaced for Rs. 100 with a written application.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How do I change my elective subject?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Hand the elective change form to your class coordinator within the first two weeks of the semester. Changes are approved only if seats remain in the new elective. After the window closes, you can switch next semester.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How do I get a bonafide certificate?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Fill in the request form at the office and attach a copy of your ID card. It is issued in two working days. Write the purpose (bank, passport or scholarship) on the form to avoid delays.</p></div></div>
+    </div>
+  </section>
+
+  <section class="line" data-line="exams">
+    <h2 class="line-title"><span class="badge">2</span>Exams</h2>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>Where can I download my hall ticket?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Hall tickets appear on the student portal about seven days before the exams start. You need cleared fees and at least 75 percent attendance. Print two copies and carry one with your ID card.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How do I apply for revaluation?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Apply on the portal within five days of the result, one application per subject, and pay the revaluation fee. Keep the receipt number. Revised marks are published in about two weeks, and the higher score is kept.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>What if I miss an exam because I was ill?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Give the exam cell a medical certificate and a supplementary exam application within three days of the missed paper. Approved students sit the supplementary exam within the following month.</p></div></div>
+    </div>
+  </section>
+
+  <section class="line" data-line="fees">
+    <h2 class="line-title"><span class="badge">3</span>Fees</h2>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>What is the last date to pay semester fees?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Fees are due by the 15th of the first month of each semester. After that a late fee of Rs. 50 a day applies, up to Rs. 1,000. You can pay online or at the accounts window.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How do I apply for a scholarship?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Check the list of schemes on the notice board or portal. Submit the application with your income certificate, last marksheet and a copy of your bank passbook to the accounts office before the notified deadline.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>Can I get a refund if I withdraw?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>It depends on timing: full refund before classes begin, partial refund in the first month, and none after that. Submit a written withdrawal application with your fee receipt to the accounts office.</p></div></div>
+    </div>
+  </section>
+
+  <section class="line" data-line="labs">
+    <h2 class="line-title"><span class="badge">4</span>Labs and library</h2>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>What are the lab timings?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Labs run Monday to Saturday, 9 am to 5 pm, in the batches shown on your timetable. Open lab hours with a lab assistant are 4 to 6 pm on weekdays, for practice and unfinished experiments.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How many books can I borrow from the library?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Three books for 14 days each. You can renew once online if nobody has reserved the title. Late returns cost Rs. 2 a day per book.</p></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" aria-expanded="false"><span>How do I get campus Wi-Fi access?</span><span class="chev"></span></button>
+      <div class="faq-answer"><div class="faq-answer-inner"><p>Ask the IT desk for credentials and show your ID card. Accounts are active within a day. Your username is your enrolment number, and you must change the default password the first time you log in.</p></div></div>
+    </div>
+  </section>
+
+  <div id="empty" class="empty">No question matches that search. Try a shorter word, or visit the department office.</div>
+
+  <section class="terminus">
+    <h2>Still not sure?</h2>
+    <p>Visit the department office, Room 204, from 10 am to 4 pm, Monday to Saturday.</p>
+    <p>Or write to help@department.example and we will reply within one working day.</p>
+  </section>
+</main>
+
+<script>
+  // STEP 3: select all FAQ question headers
+  var questions = document.querySelectorAll('.faq-question');
+
+  // STEP 4: loop through them and attach a click listener to each one
+  for (var i = 0; i < questions.length; i++) {
+    questions[i].addEventListener('click', function (event) {
+      var question = event.currentTarget;          // the button that was clicked
+      var item = question.parentElement;           // the .faq-item that wraps it
+      var answer = question.nextElementSibling;    // STEP 5: DOM traversal to the answer block
+
+      item.classList.toggle('active');             // show or hide through the CSS class
+
+      var isOpen = item.classList.contains('active');
+      question.setAttribute('aria-expanded', isOpen);
+      answer.setAttribute('aria-hidden', !isOpen);
+    });
+  }
+
+  // ---------- Extras: line filter, search, open all, close all ----------
+  var items = document.querySelectorAll('.faq-item');
+  var lines = document.querySelectorAll('.line');
+  var chips = document.querySelectorAll('.chip');
+  var searchBox = document.getElementById('search');
+  var countText = document.getElementById('count');
+  var emptyBox = document.getElementById('empty');
+  var currentLine = 'all';
+
+  function applyFilters() {
+    var query = searchBox.value.trim().toLowerCase();
+    var shown = 0;
+
+    for (var l = 0; l < lines.length; l++) {
+      var line = lines[l];
+      var lineItems = line.querySelectorAll('.faq-item');
+      var visibleInLine = [];
+
+      for (var k = 0; k < lineItems.length; k++) {
+        var it = lineItems[k];
+        var text = it.textContent.toLowerCase();
+        var matchLine = currentLine === 'all' || line.dataset.line === currentLine;
+        var matchText = query === '' || text.indexOf(query) !== -1;
+        var show = matchLine && matchText;
+
+        it.classList.toggle('hidden', !show);
+        it.classList.remove('is-last');
+        if (show) { visibleInLine.push(it); shown++; }
+      }
+
+      if (visibleInLine.length > 0) {
+        visibleInLine[visibleInLine.length - 1].classList.add('is-last');   // no rail after the final station
+      }
+      line.classList.toggle('hidden', visibleInLine.length === 0);
+    }
+
+    countText.textContent = 'Showing ' + shown + ' of ' + items.length + ' questions';
+    emptyBox.classList.toggle('show', shown === 0);
+  }
+
+  function setAll(open) {
+    for (var n = 0; n < items.length; n++) {
+      if (items[n].classList.contains('hidden')) { continue; }
+      items[n].classList.toggle('active', open);
+      var btn = items[n].querySelector('.faq-question');
+      btn.setAttribute('aria-expanded', open);
+      btn.nextElementSibling.setAttribute('aria-hidden', !open);
+    }
+  }
+
+  for (var c = 0; c < chips.length; c++) {
+    chips[c].addEventListener('click', function (event) {
+      currentLine = event.currentTarget.dataset.line;
+      for (var j = 0; j < chips.length; j++) { chips[j].classList.remove('on'); }
+      event.currentTarget.classList.add('on');
+      applyFilters();
+    });
+  }
+
+  searchBox.addEventListener('input', applyFilters);
+  document.getElementById('openAll').addEventListener('click', function () { setAll(true); });
+  document.getElementById('closeAll').addEventListener('click', function () { setAll(false); });
+
+  applyFilters();
+</script>
+</body>
+</html>
